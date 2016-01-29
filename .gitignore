@@ -1,0 +1,19 @@
+### OSX ###
+.DS_Store
+._*
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### Android Studio ###
+*.iml
+.gradle
+.idea
+/build
+/captures
+/local.properties
+
+### Keys ###
+/app/src/main/res/values/api_keys.xml
