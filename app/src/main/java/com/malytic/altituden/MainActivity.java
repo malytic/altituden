@@ -75,25 +75,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_blank) {
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            Fragment fragment;
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-            fragment = new Fragment();
-
-            transaction.replace(R.id.frame, fragment);
+            transaction.replace(R.id.frame, new Fragment());
             transaction.commit();
         }
 
          if (id == R.id.nav_slideshow) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            Fragment fragment;
-
-            fragment = new MapsFragment();
-
-            transaction.replace(R.id.frame, fragment);
+            transaction.replace(R.id.frame, new MapsFragment());
             transaction.commit();
         }
 

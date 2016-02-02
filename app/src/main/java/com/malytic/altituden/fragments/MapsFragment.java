@@ -58,15 +58,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Toast.makeText(getActivity(), "Map redy, onMapReadyCallback called", Toast.LENGTH_LONG).show();
+        
         //Behöver ha koll mMap != null
         mMap = googleMap;
 
-        //LocationManager manager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-        //Location lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
         LatLng chalmers = new LatLng(57.706389, 11.938270);
         mMap.addMarker(new MarkerOptions().position(chalmers).title("Chalmers"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(chalmers));
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(chalmers, 15));
     }
