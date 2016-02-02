@@ -50,8 +50,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
+     * This is where we can add markers or lines, add listeners or move the camera.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -59,16 +58,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Toast.makeText(getActivity(), "Map redy, onMapReadyCallback called", Toast.LENGTH_LONG).show();
-
+        //Behöver ha koll mMap != null
         mMap = googleMap;
 
         //LocationManager manager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         //Location lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        LatLng sydney = new LatLng(57.706389, 11.938270);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Chalmers"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng chalmers = new LatLng(57.706389, 11.938270);
+        mMap.addMarker(new MarkerOptions().position(chalmers).title("Chalmers"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(chalmers));
 
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(chalmers, 15));
     }
 }
