@@ -64,7 +64,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-/*
+
+/*Old check for permissions
         if (ActivityCompat.checkSelfPermission((getContext()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission((getContext()), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -82,8 +83,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         //Behöver ha koll mMap != null
         mMap = googleMap;
 
-
-
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMarkerDragListener(this);
@@ -96,12 +95,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onMapClick(LatLng latLng) {
-
+        mMap.addMarker(new MarkerOptions().position(latLng).
+                title(""+latLng.latitude+","+latLng.longitude)).setDraggable(true);
     }
 
     @Override
     public void onMarkerDragStart(Marker marker) {
-
+        marker.hideInfoWindow ();
     }
 
     @Override
@@ -111,7 +111,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
-
+        marker.setTitle(""+marker.getPosition());
     }
     @Override
     public void
@@ -138,7 +138,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         mMap.setMyLocationEnabled(true);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), 15));
 
-        /*
+        /* Old positioning
         if (mLastLocation != null) {
             mMap.addMarker(new MarkerOptions().position(
                     new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude())).
