@@ -6,6 +6,7 @@ import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +64,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
+/*
         if (ActivityCompat.checkSelfPermission((getContext()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission((getContext()), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -75,13 +76,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-
-
-
+*/
         Toast.makeText(getActivity(), "Map redy, onMapReadyCallback called", Toast.LENGTH_LONG).show();
 
         //Behöver ha koll mMap != null
         mMap = googleMap;
+
+
 
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
@@ -134,10 +135,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     public void onConnected(Bundle connectionHint) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
+        mMap.setMyLocationEnabled(true);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), 15));
+
+        /*
         if (mLastLocation != null) {
-            mMap.addMarker(new MarkerOptions().position(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude())).title("Chalmers"));
+            mMap.addMarker(new MarkerOptions().position(
+                    new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude())).
+                    title("Chalmers")).setDraggable(true);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), 15));
-        }
+        }*/
     }
 
     @Override
