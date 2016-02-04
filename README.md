@@ -1,5 +1,5 @@
 # altituden
-För att få exakt GPS-data behöver man i android studio aktivera Google Play Services.
+För att få exakt GPS-data behöver man i android studio aktivera Google Play Services (Appen funkar inte utan detta!).
 
 http://developer.android.com/training/location/retrieve-current.html
 
