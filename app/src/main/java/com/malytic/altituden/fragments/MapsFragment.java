@@ -30,7 +30,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private LatLng start,dest;
+    private LatLng origin,dest;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -80,10 +80,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
      */
     @Override
     public void onMapClick(LatLng latLng) {
-        if (start == null) {
-            start = latLng;
+        if (origin == null) {
+            origin = latLng;
             mMap.addMarker(new MarkerOptions().position(latLng).
-                    title("Start")).setDraggable(true);
+                    title("Origin")).setDraggable(true);
         } else if (dest == null) {
             dest = latLng;
             mMap.addMarker(new MarkerOptions().position(latLng).
