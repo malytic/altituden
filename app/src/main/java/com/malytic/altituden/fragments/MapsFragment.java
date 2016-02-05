@@ -30,6 +30,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
+    private LatLng start,dest;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,8 +76,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onMapClick(LatLng latLng) {
-        mMap.addMarker(new MarkerOptions().position(latLng).
-                title(""+latLng.latitude+","+latLng.longitude)).setDraggable(true);
+        if(start == null || dest == null) {
+            if (start == null) {
+                start = latLng;
+                mMap.addMarker(new MarkerOptions().position(latLng).
+                        title("Start")).setDraggable(true);
+            } else if (dest == null) {
+                dest = latLng;
+                mMap.addMarker(new MarkerOptions().position(latLng).
+                        title("Destination")).setDraggable(true);
+            }
+
+        }else{ Toast.makeText(getActivity(), "You have already places a start and end marker",
+                Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -91,7 +104,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
-        marker.setTitle(""+marker.getPosition());
+        //TODO
+        //On release re-calculate route
     }
     @Override
     public void
