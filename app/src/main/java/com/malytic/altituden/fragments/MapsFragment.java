@@ -74,18 +74,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         return false;
     }
 
+    /*
+    On map click, if start or destination markers are not
+    already placed, place them at latLng
+     */
     @Override
     public void onMapClick(LatLng latLng) {
-        if(start == null || dest == null) {
-            if (start == null) {
-                start = latLng;
-                mMap.addMarker(new MarkerOptions().position(latLng).
-                        title("Start")).setDraggable(true);
-            } else if (dest == null) {
-                dest = latLng;
-                mMap.addMarker(new MarkerOptions().position(latLng).
-                        title("Destination")).setDraggable(true);
-            }
+        if (start == null) {
+            start = latLng;
+            mMap.addMarker(new MarkerOptions().position(latLng).
+                    title("Start")).setDraggable(true);
+        } else if (dest == null) {
+            dest = latLng;
+            mMap.addMarker(new MarkerOptions().position(latLng).
+                    title("Destination")).setDraggable(true);
 
         }else{ Toast.makeText(getActivity(), "You have already places a start and end marker",
                 Toast.LENGTH_LONG).show();
