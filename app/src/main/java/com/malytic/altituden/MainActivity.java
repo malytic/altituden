@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity
         /*---------------------------------
         Ask permission to use GPS
         */
-
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -78,7 +77,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -98,7 +96,6 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -106,14 +103,12 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_blank) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
             transaction.replace(R.id.frame, new Fragment());
             transaction.commit();
         }
 
          if (id == R.id.nav_slideshow) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
             transaction.replace(R.id.frame, new MapsFragment());
             transaction.commit();
         }

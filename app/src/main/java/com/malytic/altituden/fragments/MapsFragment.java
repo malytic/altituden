@@ -34,10 +34,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        Toast.makeText(getActivity(), "This is a map", Toast.LENGTH_LONG).show();
-
         View view = inflater.inflate(R.layout.activity_maps_fragment, null, false);
-
         SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -49,9 +46,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                     .addApi(LocationServices.API)
                     .build();
         }
-
-        // Inflate the layout for this fragment
-        return view; // inflater.inflate(R.layout.activity_maps_fragment, container, false);
+        return view;
     }
 
     /**
@@ -64,21 +59,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
-/*Old check for permissions
-        if (ActivityCompat.checkSelfPermission((getContext()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission((getContext()), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-*/
-        Toast.makeText(getActivity(), "Map redy, onMapReadyCallback called", Toast.LENGTH_LONG).show();
 
         //Behöver ha koll mMap != null
         mMap = googleMap;
@@ -137,14 +117,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                 mGoogleApiClient);
         mMap.setMyLocationEnabled(true);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), 15));
-
-        /* Old positioning
-        if (mLastLocation != null) {
-            mMap.addMarker(new MarkerOptions().position(
-                    new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude())).
-                    title("Chalmers")).setDraggable(true);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), 15));
-        }*/
     }
 
     @Override
