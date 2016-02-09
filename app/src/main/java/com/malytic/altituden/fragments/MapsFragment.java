@@ -2,6 +2,7 @@ package com.malytic.altituden.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,8 +33,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private LatLng origin,dest;
-
+    private MarkerOptions origin,dest;
+    private Polyline polyline;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -47,7 +50,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                     .addApi(LocationServices.API)
                     .build();
         }
+
         return view;
+
     }
 
     /**
@@ -67,6 +72,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMarkerDragListener(this);
+
     }
 
     @Override
@@ -81,13 +87,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public void onMapClick(LatLng latLng) {
         if (origin == null) {
-            origin = latLng;
-            mMap.addMarker(new MarkerOptions().position(latLng).
-                    title("Origin")).setDraggable(true);
+            origin = new MarkerOptions().position(latLng).title("Origin").draggable(true).snippet(latLng.toString());
+            mMap.addMarker(origin);
+
         } else if (dest == null) {
-            dest = latLng;
-            mMap.addMarker(new MarkerOptions().position(latLng).
-                    title("Destination")).setDraggable(true);
+            dest = new MarkerOptions().position(latLng).title("Destination").draggable(true).snippet(latLng.toString());
+            mMap.addMarker(dest);
+            polyline = mMap.addPolyline(new PolylineOptions()
+                    .add(new LatLng(origin.getPosition().latitude, origin.getPosition().longitude),
+                            new LatLng(dest.getPosition().latitude, dest.getPosition().longitude))
+                    .width(5)
+                    .color(Color.RED));
 
         }else{ Toast.makeText(getActivity(), "You have already places a start and end marker",
                 Toast.LENGTH_LONG).show();
@@ -96,18 +106,33 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onMarkerDragStart(Marker marker) {
-        marker.hideInfoWindow ();
+
+        marker.hideInfoWindow();
     }
 
     @Override
     public void onMarkerDrag(Marker marker) {
+        if(marker.getTitle().equals(origin.getTitle())) {
+            origin.position(marker.getPosition());
+            //origin.snippet(marker.getPosition().toString());
+        } else if(marker.getTitle().equals(dest.getTitle())) {
+            dest.position(marker.getPosition());
+            //dest.snippet("HEJ");
+        }
+
+        polyline.remove();
+        polyline = mMap.addPolyline(new PolylineOptions()
+                .add(new LatLng(origin.getPosition().latitude, origin.getPosition().longitude)
+                        , new LatLng(dest.getPosition().latitude, dest.getPosition().longitude))
+                .width(5)
+                .color(Color.RED));
 
     }
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
         //TODO
-        //On release re-calculate route
+
     }
     @Override
     public void
