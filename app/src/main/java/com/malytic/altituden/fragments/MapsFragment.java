@@ -19,6 +19,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.malytic.altituden.DirectionsHandler;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -98,28 +99,55 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                             new LatLng(dest.getPosition().latitude, dest.getPosition().longitude))
                     .width(5)
                     .color(Color.RED));
+            PolylineOptions path = DirectionsHandler.GetDirectionsPolyline(origin.getPosition(), dest.getPosition());
+            if(path != null){
+                path.width(5).color(Color.RED);
+                mMap.addPolyline(path);
+            }
 
         }else{ Toast.makeText(getActivity(), "You have already places a start and end marker",
                 Toast.LENGTH_LONG).show();
         }
     }
+    /*
 
+     */
     @Override
     public void onMarkerDragStart(Marker marker) {
 
+        boolean isMarkerOrigin = false;
+        if(marker.getTitle().equals(origin.getTitle())) {
+            origin.position(marker.getPosition());
+            isMarkerOrigin = true;
+            //origin.snippet(marker.getPosition().toString());
+        } else if(marker.getTitle().equals(dest.getTitle())) {
+            dest.position(marker.getPosition());
+            isMarkerOrigin = false;
+            //dest.snippet("HEJ");
+        }
+        marker.setSnippet(marker.getPosition().toString());
+        polyline.remove();
+        polyline = mMap.addPolyline(new PolylineOptions()
+                .add(new LatLng(origin.getPosition().latitude, origin.getPosition().longitude)
+                        , new LatLng(dest.getPosition().latitude, dest.getPosition().longitude))
+                .width(5)
+                .color(Color.RED));
         marker.hideInfoWindow();
     }
 
     @Override
     public void onMarkerDrag(Marker marker) {
+        boolean isMarkerOrigin = false;
         if(marker.getTitle().equals(origin.getTitle())) {
             origin.position(marker.getPosition());
+            isMarkerOrigin = true;
             //origin.snippet(marker.getPosition().toString());
         } else if(marker.getTitle().equals(dest.getTitle())) {
             dest.position(marker.getPosition());
+            isMarkerOrigin = false;
             //dest.snippet("HEJ");
         }
-
+        marker.setSnippet(marker.getPosition().toString());
         polyline.remove();
         polyline = mMap.addPolyline(new PolylineOptions()
                 .add(new LatLng(origin.getPosition().latitude, origin.getPosition().longitude)
