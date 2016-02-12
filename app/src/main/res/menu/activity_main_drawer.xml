@@ -5,31 +5,14 @@
 
         <item
             android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/karta_icon"
             android:title="Karta" />
 
         <item
             android:id="@+id/nav_blank"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Blank" />
+            android:icon="@drawable/elevation_icon"
+            android:title="Elevation" />
 
     </group>
-
-    <!--
-    COMMUNICATE
-
-
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
-        </menu>
-    </item>-->
 
 </menu>
