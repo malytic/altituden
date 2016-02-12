@@ -1,6 +1,7 @@
 package com.malytic.altituden;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -11,6 +12,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -54,6 +57,15 @@ public class HttpRequestHandler {
 
                     @Override
                     public void onResponse(JSONObject response) {
+                        try {
+                            Log.e("Heh", response.toString());
+                            JSONArray elevationArray = response.getJSONArray("result");
+                            JSONObject eObj = elevationArray.optJSONObject(0);
+                            String elevationString = eObj.toString();
+                            Log.d("eURL", elevationString);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, new Response.ErrorListener() {
 

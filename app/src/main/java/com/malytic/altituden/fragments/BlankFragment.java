@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.malytic.altituden.HttpRequestHandler;
 import com.malytic.altituden.R;
 
 import java.io.BufferedReader;
@@ -29,49 +30,31 @@ public class BlankFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        //Toast.makeText(getContext(), "Hej hej", Toast.LENGTH_LONG).show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    chartElevation();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-        Toast.makeText(getContext(), "Hej hej", Toast.LENGTH_LONG).show();
+        try {
+            chartElevation();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return inflater.inflate(R.layout.fragment_blank, container, false);
 
     }
 
+
     public void chartElevation() throws IOException {
 
+        HttpRequestHandler httpReq = new HttpRequestHandler();
         location = "57.681385,11.985651";
-        elevationURL = baseURL + "?locations=" + location +"&key=" + "AIzaSyDVDLVd-y_ExGMGttuQdImSaZOFQVMJeT8";
-        URL finishedURL = new URL(elevationURL);
-        //Log.d("URL", ""+finishedURL);
+        elevationURL = baseURL + "?locations=" + location + "&key=" + getResources().getString(R.string.google_elevation_key);
+        httpReq.elevationRequest(getContext(), elevationURL);
+        //InputStream is = conn.getInputStream();
 
-        HttpURLConnection conn = (HttpURLConnection) finishedURL.openConnection();
-
-
-        conn.setRequestMethod("GET");
-        InputStream is = conn.getInputStream();
-
-        Log.d("URL", "" + conn.getResponseCode());
-        //int tst = conn.getResponseCode();
-        // Toast.makeText(getContext(), "KOD:", Toast.LENGTH_LONG).show();
-
-        //Toast.makeText(getContext(), conn.getResponseCode(), Toast.LENGTH_LONG).show();
-
-
-        //conn.setRequestMethod("GET");
-        String line;
+        /*String line;
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         while((line = reader.readLine())!= null) {
             outputStream += line;
         }
         //Log.d("",outputStream);
 
+    }*/
     }
 }
