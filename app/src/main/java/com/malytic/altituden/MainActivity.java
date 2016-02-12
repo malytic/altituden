@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.malytic.altituden.fragments.BlankFragment;
 import com.malytic.altituden.fragments.MapsFragment;
 import com.malytic.altituden.R;
 
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_blank) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.frame, new Fragment());
+            transaction.replace(R.id.frame, new BlankFragment());
             transaction.commit();
         }
 
