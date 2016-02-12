@@ -59,10 +59,12 @@ public class HttpRequestHandler {
                     public void onResponse(JSONObject response) {
                         try {
                             Log.e("Heh", response.toString());
-                            JSONArray elevationArray = response.getJSONArray("result");
+                            JSONArray elevationArray = response.getJSONArray("results");
                             JSONObject eObj = elevationArray.optJSONObject(0);
-                            String elevationString = eObj.toString();
-                            Log.d("eURL", elevationString);
+                            String eString = eObj.getString("elevation");
+                            Log.d("eURL1", eString);
+                            apiInteger = Integer.parseInt(eString);
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -77,5 +79,8 @@ public class HttpRequestHandler {
                 });
         // Add the request to the RequestQueue.
         queue.add(jsObjRequest);
+    }
+    public int getApiInteger(){
+        return apiInteger;
     }
 }
