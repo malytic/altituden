@@ -1,13 +1,9 @@
 package com.malytic.altituden.fragments;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +15,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.malytic.altituden.DirectionsHandler;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -99,7 +94,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                             new LatLng(dest.getPosition().latitude, dest.getPosition().longitude))
                     .width(5)
                     .color(Color.RED));
-            PolylineOptions path = DirectionsHandler.GetDirectionsPolyline(origin.getPosition(), dest.getPosition());
+            PolylineOptions path = null;
             if(path != null){
                 path.width(5).color(Color.RED);
                 mMap.addPolyline(path);
@@ -185,11 +180,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         mMap.setMyLocationEnabled(true);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), 15));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 15));
     }
 
     @Override
     public void onConnectionSuspended(int i) {
 
     }
+    public void requestHttp() {}
+
 }
