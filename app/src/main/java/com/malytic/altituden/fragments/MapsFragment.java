@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
+import com.malytic.altituden.Events.DirectionsEvent;
+import com.malytic.altituden.Events.ElevationEvent;
+import com.malytic.altituden.HttpRequestHandler;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,6 +28,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -30,7 +41,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private MarkerOptions origin,dest;
-    private Polyline polyline;
+    private Polyline path;
+    private HttpRequestHandler httpReq;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -46,7 +58,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                     .addApi(LocationServices.API)
                     .build();
         }
-
+        httpReq = new HttpRequestHandler(getContext());
+        path = null;
         return view;
 
     }
@@ -89,20 +102,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         } else if (dest == null) {
             dest = new MarkerOptions().position(latLng).title("Destination").draggable(true).snippet(latLng.toString());
             mMap.addMarker(dest);
-            polyline = mMap.addPolyline(new PolylineOptions()
-                    .add(new LatLng(origin.getPosition().latitude, origin.getPosition().longitude),
-                            new LatLng(dest.getPosition().latitude, dest.getPosition().longitude))
-                    .width(5)
-                    .color(Color.RED));
-            PolylineOptions path = null;
-            if(path != null){
-                path.width(5).color(Color.RED);
-                mMap.addPolyline(path);
-            }
+            updateDirections(origin.getPosition(), dest.getPosition());
 
-        }else{ Toast.makeText(getActivity(), "You have already places a start and end marker",
-                Toast.LENGTH_LONG).show();
+        }else {
+            // markers already placed --
         }
+        updateElevation(latLng);
     }
     /*
 
@@ -110,50 +115,32 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public void onMarkerDragStart(Marker marker) {
 
-        boolean isMarkerOrigin = false;
         if(marker.getTitle().equals(origin.getTitle())) {
             origin.position(marker.getPosition());
-            isMarkerOrigin = true;
-            //origin.snippet(marker.getPosition().toString());
         } else if(marker.getTitle().equals(dest.getTitle())) {
             dest.position(marker.getPosition());
-            isMarkerOrigin = false;
             //dest.snippet("HEJ");
         }
         marker.setSnippet(marker.getPosition().toString());
-        polyline.remove();
-        polyline = mMap.addPolyline(new PolylineOptions()
-                .add(new LatLng(origin.getPosition().latitude, origin.getPosition().longitude)
-                        , new LatLng(dest.getPosition().latitude, dest.getPosition().longitude))
-                .width(5)
-                .color(Color.RED));
         marker.hideInfoWindow();
     }
 
     @Override
     public void onMarkerDrag(Marker marker) {
-        boolean isMarkerOrigin = false;
         if(marker.getTitle().equals(origin.getTitle())) {
             origin.position(marker.getPosition());
-            isMarkerOrigin = true;
-            //origin.snippet(marker.getPosition().toString());
         } else if(marker.getTitle().equals(dest.getTitle())) {
             dest.position(marker.getPosition());
-            isMarkerOrigin = false;
-            //dest.snippet("HEJ");
         }
         marker.setSnippet(marker.getPosition().toString());
-        polyline.remove();
-        polyline = mMap.addPolyline(new PolylineOptions()
-                .add(new LatLng(origin.getPosition().latitude, origin.getPosition().longitude)
-                        , new LatLng(dest.getPosition().latitude, dest.getPosition().longitude))
-                .width(5)
-                .color(Color.RED));
+
 
     }
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
+        updateDirections(origin.getPosition(), dest.getPosition());
+        updateElevation(marker.getPosition());
         //TODO
 
     }
@@ -167,10 +154,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     public void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
+        EventBus.getDefault().unregister(this);
         mGoogleApiClient.disconnect();
         super.onStop();
     }
@@ -185,8 +174,82 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
-    public void requestHttp() {}
+
+    @Subscribe
+    public void onDirectionsResponseEvent(DirectionsEvent event) {
+
+        JSONArray routesArray = null;
+        try {
+            routesArray = event.directionsResponse.getJSONArray("routes");
+        } catch (JSONException e) {
+            Log.e("ERROR", "Failed to get route array from response");
+            e.printStackTrace();
+        }
+        String encodedOverviewPolyline = null;
+
+        // extract the JSONObject with overview_polyline
+        for(int i = 0; i < routesArray.length(); i++) {
+            JSONObject obj = routesArray.optJSONObject(i);
+            if(obj != null) {
+                try {
+                    encodedOverviewPolyline = obj.optJSONObject("overview_polyline").getString("points");
+                } catch (JSONException e) {
+                    Log.e("ERROR", "Failed to get points string from JSONObject");
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(encodedOverviewPolyline != null) {
+            PolylineOptions thePath = new PolylineOptions().color(Color.parseColor("#CC00CAB8")).width(15)
+                    .addAll(PolyUtil.decode(encodedOverviewPolyline));
+            if (path != null) path.remove();
+
+            path = mMap.addPolyline(thePath);
+        }
+    }
+
+    private void updateDirections(LatLng origin, LatLng dest) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("https://maps.googleapis.com/maps/api/directions/json?");
+        sb.append("origin=" + origin.latitude + "," + origin.longitude);
+        sb.append("&destination=" + dest.latitude + "," + dest.longitude);
+        sb.append("&mode=walking");
+        sb.append("&key=AIzaSyDlo4aoZrAwVkMlx10GB-TzTRUPvGiiWxI");
+        httpReq.directionsRequest(sb.toString());
+    }
+
+    private void updateElevation(LatLng point) {
+        String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
+        StringBuilder sb = new StringBuilder();
+        sb.append(baseURL);
+        sb.append("?locations=" + point.latitude + "," + point.longitude);
+        sb.append("&key=" + "AIzaSyDlo4aoZrAwVkMlx10GB-TzTRUPvGiiWxI");
+        httpReq.elevationRequest(sb.toString());
+    }
+
+    @Subscribe
+    public void onElevationResponseEvent(ElevationEvent response) {
+        JSONArray elevationArray = null;
+        String eString = null;
+        Log.e("test", response.elevationResponse.toString());
+        double altitude = 0;
+        try {
+            elevationArray = response.elevationResponse.getJSONArray("results");
+            JSONObject eObj = elevationArray.optJSONObject(0);
+            eString = eObj.getString("elevation");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (eString != null) {
+            altitude = Double.parseDouble(eString);
+            Log.e("Altitude ", "" + altitude);
+            altitude = Math.round(altitude);
+            Log.e("Altitude ", "" + altitude);
+        }
+        Toast.makeText(getActivity(), "Altitude is: " + altitude + " meters above sea level.",
+                Toast.LENGTH_LONG).show();
+    }
 
 }

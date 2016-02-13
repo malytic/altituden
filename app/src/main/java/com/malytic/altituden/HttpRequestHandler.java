@@ -1,86 +1,76 @@
 package com.malytic.altituden;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.malytic.altituden.Events.ElevationEvent;
+import com.malytic.altituden.Events.DirectionsEvent;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 /**
  * Created by William on 2016-02-12.
  */
 public class HttpRequestHandler {
-    private static PolylineOptions staticPath;
-    private static int apiInteger;
-    public static void directionsRequest(Context context, String inUrl) {
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(context);
+
+
+
+    private RequestQueue queue;
+    private Response.Listener<JSONObject> directionsResponseListener;
+    private Response.Listener<JSONObject> altitudeResponseListener;
+    private Response.ErrorListener errorListener;
+
+
+    public HttpRequestHandler(Context context) {
+
+        // Init Volley queue
+        queue = Volley.newRequestQueue(context);
+        // init response and error listeners
+        directionsResponseListener  = new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                //directions response
+                EventBus.getDefault().post(new DirectionsEvent(response));
+            }
+        };
+        altitudeResponseListener  = new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                // altitude response
+                EventBus.getDefault().post(new ElevationEvent(response));
+            }
+        };
+
+        errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // send errorEvent to event bus?
+            }
+        };
+    }
+
+    public void directionsRequest(String inUrl) {
         String url = inUrl;
 
         // Request a string response from the provided URL.
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });
-        // Add the request to the RequestQueue.
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(
+                Request.Method.GET, url, null, directionsResponseListener, errorListener);
         queue.add(jsObjRequest);
     }
 
-    public static void elevationRequest(Context context, String inUrl) {
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(context);
+    public void elevationRequest(String inUrl) {
         String url = inUrl;
 
         // Request a string response from the provided URL.
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            Log.e("Heh", response.toString());
-                            JSONArray elevationArray = response.getJSONArray("results");
-                            JSONObject eObj = elevationArray.optJSONObject(0);
-                            String eString = eObj.getString("elevation");
-                            Log.d("eURL1", eString);
-                            apiInteger = Integer.parseInt(eString);
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(
+                Request.Method.GET, url, null, altitudeResponseListener, errorListener);
         // Add the request to the RequestQueue.
         queue.add(jsObjRequest);
-    }
-    public int getApiInteger(){
-        return apiInteger;
     }
 }
