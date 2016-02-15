@@ -43,6 +43,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private MarkerOptions origin,dest;
     private Polyline path;
     private HttpRequestHandler httpReq;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -75,7 +76,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        //Behöver ha koll mMap != null
         mMap = googleMap;
 
         mMap.setOnMarkerClickListener(this);
@@ -176,39 +176,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     public void onConnectionSuspended(int i) {
     }
 
-    @Subscribe
-    public void onDirectionsResponseEvent(DirectionsEvent event) {
-
-        JSONArray routesArray = null;
-        try {
-            routesArray = event.directionsResponse.getJSONArray("routes");
-        } catch (JSONException e) {
-            Log.e("ERROR", "Failed to get route array from response");
-            e.printStackTrace();
-        }
-        String encodedOverviewPolyline = null;
-
-        // extract the JSONObject with overview_polyline
-        for(int i = 0; i < routesArray.length(); i++) {
-            JSONObject obj = routesArray.optJSONObject(i);
-            if(obj != null) {
-                try {
-                    encodedOverviewPolyline = obj.optJSONObject("overview_polyline").getString("points");
-                } catch (JSONException e) {
-                    Log.e("ERROR", "Failed to get points string from JSONObject");
-                    e.printStackTrace();
-                }
-            }
-        }
-        if(encodedOverviewPolyline != null) {
-            PolylineOptions thePath = new PolylineOptions().color(Color.parseColor("#CC00CAB8")).width(15)
-                    .addAll(PolyUtil.decode(encodedOverviewPolyline));
-            if (path != null) path.remove();
-
-            path = mMap.addPolyline(thePath);
-        }
-    }
-
     private void updateDirections(LatLng origin, LatLng dest) {
 
         StringBuilder sb = new StringBuilder();
@@ -216,7 +183,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         sb.append("origin=" + origin.latitude + "," + origin.longitude);
         sb.append("&destination=" + dest.latitude + "," + dest.longitude);
         sb.append("&mode=walking");
-        sb.append("&key=AIzaSyDlo4aoZrAwVkMlx10GB-TzTRUPvGiiWxI");
+        sb.append("&key=" + getResources().getString(R.string.google_server_key));
         httpReq.directionsRequest(sb.toString());
     }
 
@@ -225,31 +192,62 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         StringBuilder sb = new StringBuilder();
         sb.append(baseURL);
         sb.append("?locations=" + point.latitude + "," + point.longitude);
-        sb.append("&key=" + "AIzaSyDlo4aoZrAwVkMlx10GB-TzTRUPvGiiWxI");
+        sb.append("&key=" + getResources().getString(R.string.google_server_key));
         httpReq.elevationRequest(sb.toString());
     }
 
     @Subscribe
-    public void onElevationResponseEvent(ElevationEvent response) {
-        JSONArray elevationArray = null;
-        String eString = null;
-        Log.e("test", response.elevationResponse.toString());
-        double altitude = 0;
+    public void onDirectionsResponseEvent(DirectionsEvent event) {
         try {
-            elevationArray = response.elevationResponse.getJSONArray("results");
-            JSONObject eObj = elevationArray.optJSONObject(0);
-            eString = eObj.getString("elevation");
+            PolylineOptions thePath = new PolylineOptions().color(Color.parseColor("#CC00CAB8")).width(15)
+                    .addAll(PolyUtil.decode(extractEncodedPath(event.directionsResponse)));
+
+            if (path != null) path.remove();
+            path = mMap.addPolyline(thePath);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if (eString != null) {
-            altitude = Double.parseDouble(eString);
-            Log.e("Altitude ", "" + altitude);
-            altitude = Math.round(altitude);
-            Log.e("Altitude ", "" + altitude);
-        }
-        Toast.makeText(getActivity(), "Altitude is: " + altitude + " meters above sea level.",
-                Toast.LENGTH_LONG).show();
     }
 
+    @Subscribe
+    public void onElevationResponseEvent(ElevationEvent response) {
+        String eString = null;
+        float altitude = 0;
+        try {
+            altitude = extractElevation(response.elevationResponse);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+    extracts the encoded path data from a JSONObject response
+     */
+    private String extractEncodedPath(JSONObject obj) throws JSONException {
+
+        System.out.print(obj.toString(4));
+
+        JSONArray routesArray;
+        routesArray = obj.getJSONArray("routes");
+        String encodedOverviewPolyline = null;
+        // extract the JSONObject with overview_polyline
+        for(int i = 0; i < routesArray.length(); i++) {
+            JSONObject o = routesArray.optJSONObject(i);
+            if(o != null) {
+                encodedOverviewPolyline = o.optJSONObject("overview_polyline").getString("points");
+            }
+        }
+        return encodedOverviewPolyline;
+    }
+
+    /*
+    extracts elvation data from JSONObject
+     */
+    private float extractElevation(JSONObject obj) throws JSONException {
+        System.out.print(obj.toString(4));
+        JSONArray elevationArray;
+        elevationArray = obj.getJSONArray("results");
+        JSONObject eObj = elevationArray.optJSONObject(0);
+        return Float.parseFloat(eObj.getString("elevation"));
+    }
 }
