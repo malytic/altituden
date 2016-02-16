@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -16,9 +15,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.malytic.altituden.fragments.BlankFragment;
+import com.malytic.altituden.fragments.GraphFragment;
 import com.malytic.altituden.fragments.MapsFragment;
-import com.malytic.altituden.R;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -104,7 +102,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_blank) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.frame, new BlankFragment());
+            transaction.replace(R.id.frame, new GraphFragment());
             transaction.commit();
         }
 
