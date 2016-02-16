@@ -8,7 +8,7 @@ import android.os.IBinder;
 /**
  * Bound service that provides location tracking in the background.
  */
-public class TrackingService extends Service {
+public class TrackerService extends Service {
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
@@ -26,12 +26,12 @@ public class TrackingService extends Service {
     public class LocalBinder extends Binder {
 
         /**
-         * Get this instance of TrackingService so
+         * Get this instance of TrackerService so
          * that clients can call public methods.
-         * @return this instance of TrackingService
+         * @return this instance of TrackerService
          */
-        public TrackingService getService() {
-            return TrackingService.this;
+        public TrackerService getService() {
+            return TrackerService.this;
         }
     }
 
