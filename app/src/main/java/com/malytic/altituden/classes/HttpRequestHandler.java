@@ -1,4 +1,4 @@
-package com.malytic.altituden;
+package com.malytic.altituden.classes;
 
 import android.content.Context;
 

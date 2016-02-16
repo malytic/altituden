@@ -16,14 +16,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.fragments.GraphFragment;
 import com.malytic.altituden.fragments.MapsFragment;
+
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private MapsFragment mapsFragment;
     private GraphFragment graphFragment;
+    public static PathData pathData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,7 @@ public class MainActivity extends AppCompatActivity
                 // result of the request.
             }
         }
+        pathData = new PathData();
     }
 
     @Override
@@ -117,6 +122,7 @@ public class MainActivity extends AppCompatActivity
                 transaction.add(R.id.frame, graphFragment);
             }else if(graphFragment.isHidden()){
                 transaction.show(graphFragment);
+                graphFragment.onResume();
             }
             transaction.commit();
         }

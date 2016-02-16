@@ -7,12 +7,12 @@ import java.util.List;
 /**
  * Created by Robert on 16/02/2016.
  */
-public class GraphDataEvent {
+public class StickyGraphDataEvent {
     List<Double> elevation;
     //List<Double> resolution;
     float pathLength;
 
-    public GraphDataEvent(List<Double> elevation, float pathLength) {
+    public StickyGraphDataEvent(List<Double> elevation, float pathLength) {
         this.elevation = elevation;
         this.pathLength = pathLength;
 

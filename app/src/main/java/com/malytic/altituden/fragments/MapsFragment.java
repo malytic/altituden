@@ -16,9 +16,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
+import com.malytic.altituden.MainActivity;
+import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.events.DirectionsEvent;
 import com.malytic.altituden.events.ElevationEvent;
-import com.malytic.altituden.HttpRequestHandler;
+import com.malytic.altituden.classes.HttpRequestHandler;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,6 +28,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.malytic.altituden.events.StickyGraphDataEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -34,7 +37,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
@@ -92,25 +94,22 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         return false;
     }
 
-    /*
-    On map click, if start or destination markers are not
-    already placed, place them at latLng
+    /**
+     *  On map click, if start or destination markers are not
+     *  already placed, place them at latLng
      */
     @Override
     public void onMapClick(LatLng latLng) {
         if (origin == null) {
             origin = new MarkerOptions().position(latLng).title("Origin").draggable(true).snippet(latLng.toString());
             mMap.addMarker(origin);
-
         } else if (dest == null) {
             dest = new MarkerOptions().position(latLng).title("Destination").draggable(true).snippet(latLng.toString());
             mMap.addMarker(dest);
             updateDirections(origin.getPosition(), dest.getPosition());
-
         }else {
             // markers already placed --
         }
-        updateElevation(latLng);
     }
     /*
 
@@ -122,30 +121,24 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
             origin.position(marker.getPosition());
         } else if(marker.getTitle().equals(dest.getTitle())) {
             dest.position(marker.getPosition());
-            //dest.snippet("HEJ");
         }
-        marker.setSnippet(marker.getPosition().toString());
+        //marker.setSnippet(marker.getPosition().toString());
         marker.hideInfoWindow();
     }
 
     @Override
     public void onMarkerDrag(Marker marker) {
+        // TODO
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
         if(marker.getTitle().equals(origin.getTitle())) {
             origin.position(marker.getPosition());
         } else if(marker.getTitle().equals(dest.getTitle())) {
             dest.position(marker.getPosition());
         }
-        marker.setSnippet(marker.getPosition().toString());
-
-
-    }
-
-    @Override
-    public void onMarkerDragEnd(Marker marker) {
         updateDirections(origin.getPosition(), dest.getPosition());
-        updateElevation(marker.getPosition());
-        //TODO
-
     }
     @Override
     public void
@@ -180,108 +173,37 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     }
 
     private void updateDirections(LatLng origin, LatLng dest) {
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("https://maps.googleapis.com/maps/api/directions/json?");
-        sb.append("origin=" + origin.latitude + "," + origin.longitude);
-        sb.append("&destination=" + dest.latitude + "," + dest.longitude);
-        sb.append("&mode=walking");
-        sb.append("&key=" + getResources().getString(R.string.google_server_key));
-        httpReq.directionsRequest(sb.toString());
+        httpReq.directionsRequest(PathData.getDirectionsUrl(getContext(), origin, dest));
     }
-
-    private void updateElevation(LatLng point) {
-        String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
-        StringBuilder sb = new StringBuilder();
-        sb.append(baseURL);
-        sb.append("?locations=" + point.latitude + "," + point.longitude);
-        sb.append("&key=" + getResources().getString(R.string.google_server_key));
-        httpReq.elevationRequest(sb.toString());
-    }
-    private void updateElevation(String path) {
-        String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
-        StringBuilder sb = new StringBuilder();
-        sb.append(baseURL);
-        sb.append("?path=" + formatPoints(path));
-        sb.append("&samples=" + 20);
-        sb.append("&key=" + getResources().getString(R.string.google_server_key));
-        httpReq.elevationRequest(sb.toString());
+    private void updateElevation(JSONObject elevationResponse) {
+        try {
+            httpReq.elevationRequest(PathData.getElevationUrl(elevationResponse,getContext()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Subscribe
     public void onDirectionsResponseEvent(DirectionsEvent event) {
         try {
-            PolylineOptions thePath = new PolylineOptions().color(Color.parseColor("#CC00CAB8")).width(15)
-                    .addAll(PolyUtil.decode(extractEncodedPath(event.directionsResponse)));
-
+            MainActivity.pathData.updatePath(event.directionsResponse);
+            PolylineOptions thePath = new PolylineOptions()
+                    .color(Color.parseColor("#CC00CAB8"))
+                    .width(15)
+                    .addAll(MainActivity.pathData.points);
             if (path != null) path.remove();
             path = mMap.addPolyline(thePath);
-            updateElevation(extractEncodedPath(event.directionsResponse));
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-    public String formatPoints(String encodedString) {
-        List<LatLng> points = PolyUtil.decode(encodedString);
-        StringBuilder sb = new StringBuilder();
-        for(LatLng ll : points) {
-            sb.append(ll.latitude + "," + ll.longitude + "|");
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        return sb.toString();
+        updateElevation(event.directionsResponse);
     }
     @Subscribe
     public void onElevationResponseEvent(ElevationEvent response) {
-        List<Double> altitudes = new ArrayList<>();
-        List<Double> resolution = new ArrayList<>();
-
         try {
-            if(response.elevationResponse.getString("status").equals("OK")) {
-                JSONArray results = response.elevationResponse.getJSONArray("results");
-                for(int i = 0; i < results.length(); i ++) {
-                    JSONObject e = (JSONObject)results.get(i);
-                    altitudes.add(e.getDouble("elevation"));
-                    resolution.add(e.getDouble("resolution"));
-                }
-            }
+            MainActivity.pathData.updateElevation(response.elevationResponse);
         } catch (JSONException e) {
-            e.printStackTrace();
-
-        }
-    }
-    public float getPathLength(Polyline path) {
-        return 0;
-    }
-
-    /*
-    extracts the encoded path data from a JSONObject response
-     */
-    private String extractEncodedPath(JSONObject obj) throws JSONException {
-        JSONArray routesArray;
-        routesArray = obj.getJSONArray("routes");
-        String encodedOverviewPolyline = null;
-        // extract the JSONObject with overview_polyline
-        for(int i = 0; i < routesArray.length(); i++) {
-            JSONObject o = routesArray.optJSONObject(i);
-            if(o != null) {
-                encodedOverviewPolyline = o.optJSONObject("overview_polyline").getString("points");
-            }
-        }
-        return encodedOverviewPolyline;
-    }
-
-    /*
-    extracts elvation data from JSONObject
-     */
-    private float extractElevation(JSONObject obj) throws JSONException {
-        if(obj.getString("status").equals("OK")) {
-            JSONArray elevationArray;
-            elevationArray = obj.getJSONArray("results");
-            JSONObject eObj = elevationArray.optJSONObject(0);
-            return Float.parseFloat(eObj.getString("elevation"));
-        } else {
-            Log.e("ERROR", "Status code:" + obj.getString("status"));
-            return 0;
+            System.out.println("JSONException.");
         }
     }
 }
