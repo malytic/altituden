@@ -11,8 +11,10 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.malytic.altituden.HttpRequestHandler;
 import com.malytic.altituden.R;
+import com.malytic.altituden.events.GraphDataEvent;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 
 public class GraphFragment extends Fragment {
@@ -44,5 +46,10 @@ public class GraphFragment extends Fragment {
     public void onStop() {
         EventBus.getDefault().unregister(this);
         super.onStop();
+    }
+
+    @Subscribe
+    public void onGraphDataEvent(GraphDataEvent event) {
+        
     }
 }

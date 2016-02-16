@@ -249,6 +249,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
         }
     }
+    public float getPathLength(Polyline path) {
+        return 0;
+    }
 
     /*
     extracts the encoded path data from a JSONObject response
