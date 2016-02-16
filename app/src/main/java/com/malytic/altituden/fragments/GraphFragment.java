@@ -2,20 +2,17 @@ package com.malytic.altituden.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.malytic.altituden.events.ElevationEvent;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 import com.malytic.altituden.HttpRequestHandler;
 import com.malytic.altituden.R;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 
 public class GraphFragment extends Fragment {
@@ -28,13 +25,19 @@ public class GraphFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_blank, container, false);
-
+        return inflater.inflate(R.layout.fragment_graph, container, false);
     }
+
     @Override
     public void onStart() {
-        super.onStart();
         EventBus.getDefault().register(this);
+        super.onStart();
+
+        GraphView graph = (GraphView) getView().findViewById(R.id.graph);
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[] {
+
+        });
+        graph.addSeries(series);
     }
 
     @Override
