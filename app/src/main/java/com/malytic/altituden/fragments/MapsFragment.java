@@ -195,6 +195,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         sb.append("&key=" + getResources().getString(R.string.google_server_key));
         httpReq.elevationRequest(sb.toString());
     }
+    private void updateElevation(String path) {
+        String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
+        StringBuilder sb = new StringBuilder();
+        sb.append(baseURL);
+        sb.append("?path=" + path);
+        sb.append("&key=" + getResources().getString(R.string.google_server_key));
+        httpReq.elevationRequest(sb.toString());
+    }
 
     @Subscribe
     public void onDirectionsResponseEvent(DirectionsEvent event) {
@@ -244,10 +252,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     extracts elvation data from JSONObject
      */
     private float extractElevation(JSONObject obj) throws JSONException {
-        System.out.print(obj.toString(4));
-        JSONArray elevationArray;
-        elevationArray = obj.getJSONArray("results");
-        JSONObject eObj = elevationArray.optJSONObject(0);
-        return Float.parseFloat(eObj.getString("elevation"));
+        if(obj.getString("STATUS").equals("OK")) {
+            System.out.print(obj.toString(4));
+            JSONArray elevationArray;
+            elevationArray = obj.getJSONArray("results");
+            JSONObject eObj = elevationArray.optJSONObject(0);
+            return Float.parseFloat(eObj.getString("elevation"));
+        } else {
+            Log.e("ERROR", "Status code:" + obj.getString("STATUS"));
+            return 0;
+        }
     }
 }
