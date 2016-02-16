@@ -16,9 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.malytic.altituden.fragments.BlankFragment;
+import com.malytic.altituden.fragments.GraphFragment;
 import com.malytic.altituden.fragments.MapsFragment;
-import com.malytic.altituden.R;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity
                     transaction.hide(tmp);
 
             if(graphFragment == null) {
-                blankFragment = new BlankFragment();
+                graphFragment = new GraphFragment();
                 transaction.add(R.id.frame, graphFragment);
             }else if(graphFragment.isHidden()){
                 transaction.show(graphFragment);

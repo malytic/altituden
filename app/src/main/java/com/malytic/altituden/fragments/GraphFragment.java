@@ -18,7 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class BlankFragment extends Fragment {
+public class GraphFragment extends Fragment {
     private String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
     private HttpRequestHandler httpReq;
 
@@ -27,44 +27,10 @@ public class BlankFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        httpReq = new HttpRequestHandler(getContext());
-        chartElevation();
-
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_blank, container, false);
 
     }
-
-
-    public void chartElevation() {
-        String location = "57.681385,11.985651";
-        StringBuilder sb = new StringBuilder();
-        sb.append(baseURL);
-        sb.append("?locations=" + location);
-        sb.append("&key=" + "AIzaSyDlo4aoZrAwVkMlx10GB-TzTRUPvGiiWxI");
-        httpReq.elevationRequest(sb.toString());
-    }
-
-    @Subscribe
-    public void onElevationResponseEvent(ElevationEvent response) {
-        JSONArray elevationArray = null;
-        String eString = null;
-        Log.e("test",response.elevationResponse.toString());
-        int altitude = 0;
-        try {
-            elevationArray = response.elevationResponse.getJSONArray("results");
-            JSONObject eObj = elevationArray.optJSONObject(0);
-            eString = eObj.getString("elevation");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if(eString != null) {
-            altitude = Integer.parseInt(eString);
-            Log.e("Altitude",Integer.toString(altitude));
-        }
-    }
-
-
     @Override
     public void onStart() {
         super.onStart();
