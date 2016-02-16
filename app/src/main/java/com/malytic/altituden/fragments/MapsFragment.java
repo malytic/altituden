@@ -33,6 +33,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -198,7 +202,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
         StringBuilder sb = new StringBuilder();
         sb.append(baseURL);
-        sb.append("?path=" + path);
+        sb.append("?path=" + formatPoints(path));
+        sb.append("&samples=" + 20);
         sb.append("&key=" + getResources().getString(R.string.google_server_key));
         httpReq.elevationRequest(sb.toString());
     }
@@ -211,19 +216,37 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
             if (path != null) path.remove();
             path = mMap.addPolyline(thePath);
+            updateElevation(extractEncodedPath(event.directionsResponse));
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
-
+    public String formatPoints(String encodedString) {
+        List<LatLng> points = PolyUtil.decode(encodedString);
+        StringBuilder sb = new StringBuilder();
+        for(LatLng ll : points) {
+            sb.append(ll.latitude + "," + ll.longitude + "|");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+    }
     @Subscribe
     public void onElevationResponseEvent(ElevationEvent response) {
-        String eString = null;
-        float altitude = 0;
+        List<Double> altitudes = new ArrayList<>();
+        List<Double> resolution = new ArrayList<>();
+
         try {
-            altitude = extractElevation(response.elevationResponse);
+            if(response.elevationResponse.getString("status").equals("OK")) {
+                JSONArray results = response.elevationResponse.getJSONArray("results");
+                for(int i = 0; i < results.length(); i ++) {
+                    JSONObject e = (JSONObject)results.get(i);
+                    altitudes.add(e.getDouble("elevation"));
+                    resolution.add(e.getDouble("resolution"));
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
+
         }
     }
 
@@ -231,9 +254,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     extracts the encoded path data from a JSONObject response
      */
     private String extractEncodedPath(JSONObject obj) throws JSONException {
-
-        System.out.print(obj.toString(4));
-
         JSONArray routesArray;
         routesArray = obj.getJSONArray("routes");
         String encodedOverviewPolyline = null;
@@ -251,14 +271,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     extracts elvation data from JSONObject
      */
     private float extractElevation(JSONObject obj) throws JSONException {
-        if(obj.getString("STATUS").equals("OK")) {
-            System.out.print(obj.toString(4));
+        if(obj.getString("status").equals("OK")) {
             JSONArray elevationArray;
             elevationArray = obj.getJSONArray("results");
             JSONObject eObj = elevationArray.optJSONObject(0);
             return Float.parseFloat(eObj.getString("elevation"));
         } else {
-            Log.e("ERROR", "Status code:" + obj.getString("STATUS"));
+            Log.e("ERROR", "Status code:" + obj.getString("status"));
             return 0;
         }
     }
