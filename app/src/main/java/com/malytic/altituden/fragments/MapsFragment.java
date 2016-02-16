@@ -1,21 +1,24 @@
 package com.malytic.altituden.fragments;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
+import com.malytic.altituden.events.DirectionsEvent;
+import com.malytic.altituden.events.ElevationEvent;
+import com.malytic.altituden.HttpRequestHandler;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,13 +27,25 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private LatLng start,dest;
+    private MarkerOptions origin,dest;
+    private Polyline path;
+    private HttpRequestHandler httpReq;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,7 +62,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                     .addApi(LocationServices.API)
                     .build();
         }
+        httpReq = new HttpRequestHandler(getContext());
+        path = null;
         return view;
+
     }
 
     /**
@@ -61,12 +79,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        //Behöver ha koll mMap != null
         mMap = googleMap;
 
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMarkerDragListener(this);
+
     }
 
     @Override
@@ -80,34 +98,54 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
      */
     @Override
     public void onMapClick(LatLng latLng) {
-        if (start == null) {
-            start = latLng;
-            mMap.addMarker(new MarkerOptions().position(latLng).
-                    title("Start")).setDraggable(true);
+        if (origin == null) {
+            origin = new MarkerOptions().position(latLng).title("Origin").draggable(true).snippet(latLng.toString());
+            mMap.addMarker(origin);
+
         } else if (dest == null) {
-            dest = latLng;
-            mMap.addMarker(new MarkerOptions().position(latLng).
-                    title("Destination")).setDraggable(true);
+            dest = new MarkerOptions().position(latLng).title("Destination").draggable(true).snippet(latLng.toString());
+            mMap.addMarker(dest);
+            updateDirections(origin.getPosition(), dest.getPosition());
 
-        }else{ Toast.makeText(getActivity(), "You have already places a start and end marker",
-                Toast.LENGTH_LONG).show();
+        }else {
+            // markers already placed --
         }
+        updateElevation(latLng);
     }
+    /*
 
+     */
     @Override
     public void onMarkerDragStart(Marker marker) {
-        marker.hideInfoWindow ();
+
+        if(marker.getTitle().equals(origin.getTitle())) {
+            origin.position(marker.getPosition());
+        } else if(marker.getTitle().equals(dest.getTitle())) {
+            dest.position(marker.getPosition());
+            //dest.snippet("HEJ");
+        }
+        marker.setSnippet(marker.getPosition().toString());
+        marker.hideInfoWindow();
     }
 
     @Override
     public void onMarkerDrag(Marker marker) {
+        if(marker.getTitle().equals(origin.getTitle())) {
+            origin.position(marker.getPosition());
+        } else if(marker.getTitle().equals(dest.getTitle())) {
+            dest.position(marker.getPosition());
+        }
+        marker.setSnippet(marker.getPosition().toString());
+
 
     }
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
+        updateDirections(origin.getPosition(), dest.getPosition());
+        updateElevation(marker.getPosition());
         //TODO
-        //On release re-calculate route
+
     }
     @Override
     public void
@@ -119,10 +157,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     public void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
+        EventBus.getDefault().unregister(this);
         mGoogleApiClient.disconnect();
         super.onStop();
     }
@@ -132,11 +172,113 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         mMap.setMyLocationEnabled(true);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), 15));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 15));
     }
 
     @Override
     public void onConnectionSuspended(int i) {
+    }
 
+    private void updateDirections(LatLng origin, LatLng dest) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("https://maps.googleapis.com/maps/api/directions/json?");
+        sb.append("origin=" + origin.latitude + "," + origin.longitude);
+        sb.append("&destination=" + dest.latitude + "," + dest.longitude);
+        sb.append("&mode=walking");
+        sb.append("&key=" + getResources().getString(R.string.google_server_key));
+        httpReq.directionsRequest(sb.toString());
+    }
+
+    private void updateElevation(LatLng point) {
+        String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
+        StringBuilder sb = new StringBuilder();
+        sb.append(baseURL);
+        sb.append("?locations=" + point.latitude + "," + point.longitude);
+        sb.append("&key=" + getResources().getString(R.string.google_server_key));
+        httpReq.elevationRequest(sb.toString());
+    }
+    private void updateElevation(String path) {
+        String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
+        StringBuilder sb = new StringBuilder();
+        sb.append(baseURL);
+        sb.append("?path=" + formatPoints(path));
+        sb.append("&samples=" + 20);
+        sb.append("&key=" + getResources().getString(R.string.google_server_key));
+        httpReq.elevationRequest(sb.toString());
+    }
+
+    @Subscribe
+    public void onDirectionsResponseEvent(DirectionsEvent event) {
+        try {
+            PolylineOptions thePath = new PolylineOptions().color(Color.parseColor("#CC00CAB8")).width(15)
+                    .addAll(PolyUtil.decode(extractEncodedPath(event.directionsResponse)));
+
+            if (path != null) path.remove();
+            path = mMap.addPolyline(thePath);
+            updateElevation(extractEncodedPath(event.directionsResponse));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    public String formatPoints(String encodedString) {
+        List<LatLng> points = PolyUtil.decode(encodedString);
+        StringBuilder sb = new StringBuilder();
+        for(LatLng ll : points) {
+            sb.append(ll.latitude + "," + ll.longitude + "|");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+    }
+    @Subscribe
+    public void onElevationResponseEvent(ElevationEvent response) {
+        List<Double> altitudes = new ArrayList<>();
+        List<Double> resolution = new ArrayList<>();
+
+        try {
+            if(response.elevationResponse.getString("status").equals("OK")) {
+                JSONArray results = response.elevationResponse.getJSONArray("results");
+                for(int i = 0; i < results.length(); i ++) {
+                    JSONObject e = (JSONObject)results.get(i);
+                    altitudes.add(e.getDouble("elevation"));
+                    resolution.add(e.getDouble("resolution"));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    /*
+    extracts the encoded path data from a JSONObject response
+     */
+    private String extractEncodedPath(JSONObject obj) throws JSONException {
+        JSONArray routesArray;
+        routesArray = obj.getJSONArray("routes");
+        String encodedOverviewPolyline = null;
+        // extract the JSONObject with overview_polyline
+        for(int i = 0; i < routesArray.length(); i++) {
+            JSONObject o = routesArray.optJSONObject(i);
+            if(o != null) {
+                encodedOverviewPolyline = o.optJSONObject("overview_polyline").getString("points");
+            }
+        }
+        return encodedOverviewPolyline;
+    }
+
+    /*
+    extracts elvation data from JSONObject
+     */
+    private float extractElevation(JSONObject obj) throws JSONException {
+        if(obj.getString("status").equals("OK")) {
+            JSONArray elevationArray;
+            elevationArray = obj.getJSONArray("results");
+            JSONObject eObj = elevationArray.optJSONObject(0);
+            return Float.parseFloat(eObj.getString("elevation"));
+        } else {
+            Log.e("ERROR", "Status code:" + obj.getString("status"));
+            return 0;
+        }
     }
 }
