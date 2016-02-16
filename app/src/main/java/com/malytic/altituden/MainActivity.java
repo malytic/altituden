@@ -23,6 +23,9 @@ import com.malytic.altituden.R;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private MapsFragment mapsFragment;
+    private GraphFragment graphFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,14 +106,36 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_blank) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.frame, new BlankFragment());
+            Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Graph");
+
+            if(tmp != null)
+                if(tmp != graphFragment)
+                    transaction.hide(tmp);
+
+            if(graphFragment == null) {
+                blankFragment = new BlankFragment();
+                transaction.add(R.id.frame, graphFragment);
+            }else if(graphFragment.isHidden()){
+                transaction.show(graphFragment);
+            }
             transaction.commit();
         }
 
-         if (id == R.id.nav_slideshow) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.frame, new MapsFragment());
+        if (id == R.id.nav_slideshow) {
+            Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Map");
+
+            if(tmp != null)
+                if(tmp != mapsFragment)
+                    transaction.hide(tmp);
+
+            if(mapsFragment == null) {
+                mapsFragment = new MapsFragment();
+                transaction.add(R.id.frame, mapsFragment);
+            }else if(mapsFragment.isHidden()){
+                transaction.show(mapsFragment);
+            }
             transaction.commit();
         }
 
