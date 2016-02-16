@@ -1,4 +1,4 @@
-package com.malytic.altituden.Events;
+package com.malytic.altituden.events;
 
 import org.json.JSONObject;
 

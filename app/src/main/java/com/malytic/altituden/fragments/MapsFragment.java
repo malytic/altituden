@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -17,8 +16,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
-import com.malytic.altituden.Events.DirectionsEvent;
-import com.malytic.altituden.Events.ElevationEvent;
+import com.malytic.altituden.events.DirectionsEvent;
+import com.malytic.altituden.events.ElevationEvent;
 import com.malytic.altituden.HttpRequestHandler;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;

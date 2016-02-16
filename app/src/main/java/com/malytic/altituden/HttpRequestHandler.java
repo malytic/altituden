@@ -8,8 +8,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.malytic.altituden.Events.ElevationEvent;
-import com.malytic.altituden.Events.DirectionsEvent;
+import com.malytic.altituden.events.ElevationEvent;
+import com.malytic.altituden.events.DirectionsEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
