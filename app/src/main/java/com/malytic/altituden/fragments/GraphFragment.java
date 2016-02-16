@@ -18,7 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class BlankFragment extends Fragment {
+public class GraphFragment extends Fragment {
     private String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
     private HttpRequestHandler httpReq;
 
