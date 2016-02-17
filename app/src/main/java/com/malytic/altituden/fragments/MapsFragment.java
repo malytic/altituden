@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.location.Location;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.maps.android.PolyUtil;
 import com.malytic.altituden.MainActivity;
 import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.events.DirectionsEvent;
@@ -28,16 +26,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.malytic.altituden.events.StickyGraphDataEvent;
+import com.malytic.altituden.events.ElevationUpdateEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -202,6 +196,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     public void onElevationResponseEvent(ElevationEvent response) {
         try {
             MainActivity.pathData.updateElevation(response.elevationResponse);
+            EventBus.getDefault().post(new ElevationUpdateEvent(""));
         } catch (JSONException e) {
             System.out.println("JSONException.");
         }
