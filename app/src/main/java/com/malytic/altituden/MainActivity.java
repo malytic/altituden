@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.malytic.altituden.classes.PathData;
+import com.malytic.altituden.fragments.FormFragment;
 import com.malytic.altituden.fragments.GraphFragment;
 import com.malytic.altituden.fragments.MapsFragment;
 
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity
 
     private MapsFragment mapsFragment;
     private GraphFragment graphFragment;
+    private FormFragment formFragment;
     public static PathData pathData;
 
     @Override
@@ -143,6 +145,24 @@ public class MainActivity extends AppCompatActivity
             }
             transaction.commit();
         }
+        if (id == R.id.nav_form) {
+            Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Form");
+
+            if(tmp != null)
+                if(tmp != formFragment)
+                    transaction.hide(tmp);
+
+            if(formFragment == null) {
+                formFragment = new FormFragment();
+                transaction.add(R.id.frame, formFragment);
+            }else if(formFragment.isHidden()){
+                transaction.show(formFragment);
+            }
+
+            transaction.commit();
+        }
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
