@@ -16,11 +16,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.malytic.altituden.classes.PathData;
+import com.malytic.altituden.fragments.GraphFragment;
 import com.malytic.altituden.fragments.MapsFragment;
-import com.malytic.altituden.R;
+
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private MapsFragment mapsFragment;
+    private GraphFragment graphFragment;
+    public static PathData pathData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +70,7 @@ public class MainActivity extends AppCompatActivity
                 // result of the request.
             }
         }
+        pathData = new PathData();
     }
 
     @Override
@@ -102,14 +110,37 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_blank) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.frame, new Fragment());
+            Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Graph");
+
+            if(tmp != null)
+                if(tmp != graphFragment)
+                    transaction.hide(tmp);
+
+            if(graphFragment == null) {
+                graphFragment = new GraphFragment();
+                transaction.add(R.id.frame, graphFragment);
+            }else if(graphFragment.isHidden()){
+                transaction.show(graphFragment);
+                graphFragment.onResume();
+            }
             transaction.commit();
         }
 
-         if (id == R.id.nav_slideshow) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.frame, new MapsFragment());
+        if (id == R.id.nav_slideshow) {
+            Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Map");
+
+            if(tmp != null)
+                if(tmp != mapsFragment)
+                    transaction.hide(tmp);
+
+            if(mapsFragment == null) {
+                mapsFragment = new MapsFragment();
+                transaction.add(R.id.frame, mapsFragment);
+            }else if(mapsFragment.isHidden()){
+                transaction.show(mapsFragment);
+            }
             transaction.commit();
         }
 

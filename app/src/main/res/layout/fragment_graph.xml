@@ -2,13 +2,13 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="net.joerichard.navigationdrawertutorial.LibraryFragment"
-    android:background="#FF0000">
+    android:background="@color/background_floating_material_light">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.jjoe64.graphview.GraphView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Hejhejhejhej"/>
+        android:layout_height="200dip"
+        android:id="@+id/graph"
+        android:layout_gravity="bottom" />
 
 </FrameLayout>
 

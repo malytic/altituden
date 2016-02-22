@@ -1,21 +1,24 @@
 package com.malytic.altituden.fragments;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.malytic.altituden.MainActivity;
+import com.malytic.altituden.classes.PathData;
+import com.malytic.altituden.events.DirectionsEvent;
+import com.malytic.altituden.events.ElevationEvent;
+import com.malytic.altituden.classes.HttpRequestHandler;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,6 +26,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.malytic.altituden.events.ElevationUpdateEvent;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -30,6 +39,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
+    private MarkerOptions origin,dest;
+    private Polyline path;
+    private HttpRequestHandler httpReq;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,7 +58,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                     .addApi(LocationServices.API)
                     .build();
         }
+        httpReq = new HttpRequestHandler(getContext());
+        path = null;
         return view;
+
     }
 
     /**
@@ -60,12 +75,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        //Behöver ha koll mMap != null
         mMap = googleMap;
 
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMarkerDragListener(this);
+
     }
 
     @Override
@@ -73,25 +88,51 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         return false;
     }
 
+    /**
+     *  On map click, if start or destination markers are not
+     *  already placed, place them at latLng
+     */
     @Override
     public void onMapClick(LatLng latLng) {
-        mMap.addMarker(new MarkerOptions().position(latLng).
-                title(""+latLng.latitude+","+latLng.longitude)).setDraggable(true);
+        if (origin == null) {
+            origin = new MarkerOptions().position(latLng).title("Origin").draggable(true).snippet(latLng.toString());
+            mMap.addMarker(origin);
+        } else if (dest == null) {
+            dest = new MarkerOptions().position(latLng).title("Destination").draggable(true).snippet(latLng.toString());
+            mMap.addMarker(dest);
+            updateDirections(origin.getPosition(), dest.getPosition());
+        }else {
+            // markers already placed --
+        }
     }
+    /*
 
+     */
     @Override
     public void onMarkerDragStart(Marker marker) {
-        marker.hideInfoWindow ();
+
+        if(marker.getTitle().equals(origin.getTitle())) {
+            origin.position(marker.getPosition());
+        } else if(marker.getTitle().equals(dest.getTitle())) {
+            dest.position(marker.getPosition());
+        }
+        //marker.setSnippet(marker.getPosition().toString());
+        marker.hideInfoWindow();
     }
 
     @Override
     public void onMarkerDrag(Marker marker) {
-
+        // TODO
     }
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
-        marker.setTitle(""+marker.getPosition());
+        if(marker.getTitle().equals(origin.getTitle())) {
+            origin.position(marker.getPosition());
+        } else if(marker.getTitle().equals(dest.getTitle())) {
+            dest.position(marker.getPosition());
+        }
+        updateDirections(origin.getPosition(), dest.getPosition());
     }
     @Override
     public void
@@ -103,10 +144,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     public void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
+        EventBus.getDefault().unregister(this);
         mGoogleApiClient.disconnect();
         super.onStop();
     }
@@ -116,11 +159,46 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         mMap.setMyLocationEnabled(true);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), 15));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 15));
     }
 
     @Override
     public void onConnectionSuspended(int i) {
+    }
 
+    private void updateDirections(LatLng origin, LatLng dest) {
+        httpReq.directionsRequest(PathData.getDirectionsUrl(getContext(), origin, dest));
+    }
+    private void updateElevation(JSONObject elevationResponse) {
+        try {
+            httpReq.elevationRequest(PathData.getElevationUrl(elevationResponse,getContext()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Subscribe
+    public void onDirectionsResponseEvent(DirectionsEvent event) {
+        try {
+            MainActivity.pathData.updatePath(event.directionsResponse);
+            PolylineOptions thePath = new PolylineOptions()
+                    .color(Color.parseColor("#CC00CAB8"))
+                    .width(15)
+                    .addAll(MainActivity.pathData.points);
+            if (path != null) path.remove();
+            path = mMap.addPolyline(thePath);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        updateElevation(event.directionsResponse);
+    }
+    @Subscribe
+    public void onElevationResponseEvent(ElevationEvent response) {
+        try {
+            MainActivity.pathData.updateElevation(response.elevationResponse);
+            EventBus.getDefault().post(new ElevationUpdateEvent(""));
+        } catch (JSONException e) {
+            System.out.println("JSONException.");
+        }
     }
 }
