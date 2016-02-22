@@ -132,7 +132,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         } else if(marker.getTitle().equals(dest.getTitle())) {
             dest.position(marker.getPosition());
         }
-        updateDirections(origin.getPosition(), dest.getPosition());
+        if(dest != null && origin != null) updateDirections(origin.getPosition(), dest.getPosition());
     }
     @Override
     public void

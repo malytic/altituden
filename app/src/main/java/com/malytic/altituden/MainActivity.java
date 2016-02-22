@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_blank) {
             Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Graph");
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();//.addToBackStack("Graph");
 
             if(tmp != null)
                 if(tmp != graphFragment)
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_slideshow) {
             Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Map");
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();//.addToBackStack("Map");
 
             if(tmp != null)
                 if(tmp != mapsFragment)
