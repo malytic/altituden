@@ -8,16 +8,8 @@
     <string name="title_activity_maps_fragment">Map</string>
     <string name="gender_prompt">Select gender</string>
     <string name="weight_prompt"></string>
-    <string-array name="spinnerWeight">
-        <item>50 kg</item>
-        <item>60 kg</item>
-        <item>70 kg</item>
-        <item>80 kg</item>
-        <item>90 kg</item>
-    </string-array>
     <string-array name="spinnerGender">
-        <item>Woman</item>
-        <item>Man</item>
-        <item>Special snowflake</item>
+        <item>Female</item>
+        <item>Male</item>
     </string-array>
 </resources>
