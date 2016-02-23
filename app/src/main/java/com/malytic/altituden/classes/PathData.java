@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
+import com.jjoe64.graphview.series.DataPoint;
 import com.malytic.altituden.R;
 
 import org.json.JSONArray;
@@ -12,7 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by William on 2016-02-16.
@@ -29,7 +33,7 @@ public class PathData {
     private boolean isValid;
     public int length;
     public String encodedPolyline;
-    public List<Double> elevation;
+    public List<ElevationPoint> elevation;
     public List<LatLng> points;
 
     /**
@@ -158,7 +162,7 @@ public class PathData {
         StringBuilder sb = new StringBuilder();
         sb.append(baseURL);
         sb.append("?path=" + encodedPolyline);
-        sb.append("&samples=" + 20);
+        sb.append("&samples=" + 20); //TODO path_length/5
         sb.append("&key=" + context.getResources().getString(R.string.google_server_key));
         return sb.toString();
     }
@@ -176,15 +180,14 @@ public class PathData {
         String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
         StringBuilder sb = new StringBuilder();
         sb.append(baseURL);
-        System.out.println(extractEncodedPath(obj));
-        sb.append("?path=" + extractEncodedPath(obj));
-        sb.append("&samples=" + (int)(extractPathLength(obj) / 5));
+        sb.append("?path=" + formatPoints(extractEncodedPath(obj)));
+        sb.append("&samples=" + (int)((extractPathLength(obj) / 5)));
         sb.append("&key=" + context.getResources().getString(R.string.google_server_key));
         return sb.toString();
     }
 
     /**
-     * Builds a string URL for a HTTP-request to Google Directions API.
+     * Builds a string URL for a http-request to Google Directions API.
      *
      * @param context needed to get the api-key from the android resources.
      * @param origin LatLng point where the directions should start from.
@@ -210,17 +213,21 @@ public class PathData {
      * one of the fields. Probably due to passing an invalid
      * JSONObject (an object not from Google Elevation API).
      */
-    public static List<Double> extractElevation(JSONObject obj) throws JSONException {
-        ArrayList<Double> result = new ArrayList<>();
+    public static List<ElevationPoint> extractElevation(JSONObject obj) throws JSONException {
+        ArrayList<ElevationPoint> result = new ArrayList<>();
 
         JSONArray results = obj.getJSONArray("results");
         for(int i = 0; i < results.length(); i ++) {
             JSONObject o = (JSONObject)results.get(i);
             if(o != null) {
-                result.add(o.getDouble("elevation"));
+                // create new ElevationPoint and add to result
+                JSONObject location = o.getJSONObject("location");
+                LatLng point = new LatLng(location.getDouble("lat"), location.getDouble("lng"));
+                ElevationPoint ePoint = new ElevationPoint(point, o.getDouble("elevation"));
+                result.add(ePoint);
             }
         }
-        //System.out.println(result);
+        System.out.println(result);
         return result;
     }
 

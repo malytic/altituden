@@ -11,6 +11,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.malytic.altituden.MainActivity;
+import com.malytic.altituden.classes.ElevationPoint;
 import com.malytic.altituden.classes.HttpRequestHandler;
 import com.malytic.altituden.R;
 import com.malytic.altituden.events.ElevationUpdateEvent;
@@ -49,15 +50,17 @@ public class GraphFragment extends Fragment {
             float dx = MainActivity.pathData.length / dataSetSize;
             DataPoint[] dataPoints = new DataPoint[dataSetSize];
             for (int i = 0; i < dataPoints.length; i++) {
-                dataPoints[i] = new DataPoint(dx * i, MainActivity.pathData.elevation.get(i));
+                dataPoints[i] = new DataPoint((dx * i), MainActivity.pathData.elevation.get(i).getElevation());
             }
             LineGraphSeries<DataPoint> series = new LineGraphSeries<>(dataPoints);
             series.setBackgroundColor(Color.parseColor("BLUE"));
             graph.getViewport().setMaxX(MainActivity.pathData.length);
             graph.getViewport().setMinX(0);
+
+            // get highest point in path
             double max = 0;
-            for(Double elev : MainActivity.pathData.elevation) {
-                if (elev > max) max = elev;
+            for(ElevationPoint ePoint: MainActivity.pathData.elevation) {
+                if (ePoint.getElevation() > max) max = ePoint.getElevation();
             }
             graph.getViewport().setMaxY(max*1.1);
             graph.getViewport().setMinY(0);
