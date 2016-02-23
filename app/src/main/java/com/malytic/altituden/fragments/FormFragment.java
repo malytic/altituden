@@ -26,6 +26,7 @@ public class FormFragment extends Fragment {
     private int standardWeight = 80;
     private int standardAge = 25;
     private int standardGender = 1;
+
     private int minWeight = 1;
     private int maxWeight = 1000;
     private int minAge = 1;
