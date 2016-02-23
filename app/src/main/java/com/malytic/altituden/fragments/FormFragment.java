@@ -100,6 +100,7 @@ public class FormFragment extends Fragment {
                         editor.remove("weight");
                         editor.apply();
                         editor.putInt("weight", weight);
+                        editor.apply();
                     }
                 } catch (Exception e) {
                     Toast.makeText(getActivity(), "Weight not valid", Toast.LENGTH_SHORT).show();
@@ -115,6 +116,7 @@ public class FormFragment extends Fragment {
                         editor.remove("age");
                         editor.apply();
                         editor.putInt("age", age);
+                        editor.apply();
                     }
                 } catch (Exception e) {
                     Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();
@@ -145,7 +147,9 @@ public class FormFragment extends Fragment {
                 editor.putInt("age", standardAge);
                 editor.putInt("gender", standardGender);
 
-                Toast.makeText(getActivity(), "Your settings have been restored to standard", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(),
+                        "Your settings have been restored to standard. Now save if you want to keep changes.",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
