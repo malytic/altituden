@@ -180,8 +180,13 @@ public class PathData {
         String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
         StringBuilder sb = new StringBuilder();
         sb.append(baseURL);
-        sb.append("?path=" + formatPoints(extractEncodedPath(obj)));
-        sb.append("&samples=" + (int)((extractPathLength(obj) / 5)));
+        System.out.println(extractEncodedPath(obj));
+        sb.append("?path=enc:" + extractEncodedPath(obj));
+        //TODO split url into several requests when samples > 500
+        int samples = extractPathLength(obj) / 10;
+        if(samples > 500) {
+            samples = 500;
+        }
         sb.append("&key=" + context.getResources().getString(R.string.google_server_key));
         return sb.toString();
     }

@@ -45,7 +45,7 @@ public class GraphFragment extends Fragment {
         graph = (GraphView) getView().findViewById(R.id.graph);
         graph.setVisibility(View.INVISIBLE);
         graph.removeAllSeries();
-        if(MainActivity.pathData.elevation != null) {
+        if(MainActivity.pathData.elevation != null && MainActivity.pathData.elevation.size() > 0) {
             int dataSetSize = MainActivity.pathData.elevation.size();
             float dx = MainActivity.pathData.length / dataSetSize;
             DataPoint[] dataPoints = new DataPoint[dataSetSize];

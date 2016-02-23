@@ -198,6 +198,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Subscribe
     public void onElevationResponseEvent(ElevationEvent response) {
         try {
+            System.out.println(response.elevationResponse.toString(4));
             MainActivity.pathData.updateElevation(response.elevationResponse);
             EventBus.getDefault().post(new ElevationUpdateEvent(""));
             FileHandler.savePathElevation(MainActivity.pathData.elevation,getContext());
