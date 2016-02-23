@@ -14,7 +14,7 @@
             android:title="Elevation" />
         <item
             android:id="@+id/nav_form"
-            android:icon="@drawable/elevation_icon"
+            android:icon="@drawable/user_icon"
             android:title="Personal information"/>
 
     </group>
