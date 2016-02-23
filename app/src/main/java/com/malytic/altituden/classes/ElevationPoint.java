@@ -17,6 +17,8 @@ public class ElevationPoint {
     public Double getElevation() {
         return elevation;
     }
+
+    @Override
     public String toString() {
         return point.toString() + elevation;
     }

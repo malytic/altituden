@@ -15,6 +15,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.malytic.altituden.MainActivity;
+import com.malytic.altituden.classes.ElevationPoint;
 import com.malytic.altituden.classes.FileHandler;
 import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.events.DirectionsEvent;
@@ -198,12 +199,50 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Subscribe
     public void onElevationResponseEvent(ElevationEvent response) {
         try {
-            System.out.println(response.elevationResponse.toString(4));
+            //System.out.println(response.elevationResponse.toString(4));
             MainActivity.pathData.updateElevation(response.elevationResponse);
             EventBus.getDefault().post(new ElevationUpdateEvent(""));
-            FileHandler.savePathElevation(MainActivity.pathData.elevation,getContext());
+            //FileHandler.savePathElevation(MainActivity.pathData.elevation, getContext());
+
+            System.out.println("Cals for route: " + calculateCalories(MainActivity.pathData));
         } catch (JSONException e) {
             System.out.println("JSONException.");
         }
+    }
+    public static int calculateCalories(PathData pathData) {
+        //TODO calculate calories for path
+        int interpolationDistance = 100;
+        float stepLength = ((float)pathData.length / (float)512);
+        int step = (int)(interpolationDistance / stepLength);
+
+        if(step >= 512) step = 511;
+
+        boolean cond = true;
+        ElevationPoint start, end;
+        boolean male = true;
+        int weight = 80;
+        double calories = 0;
+        for(int i = 0;cond; i++) {
+            int endStep = (i+1)*step;
+            if(endStep >= 512) {
+                endStep = 511;
+                cond = false;
+            }
+
+            start = pathData.elevation.get(i*step);
+            end =  pathData.elevation.get(endStep);
+
+            double angle = Math.atan((stepLength /(end.getElevation() - start.getElevation())));
+            if(angle < 0) angle = 1;
+            else angle = (angle * 0.04) + 1;
+
+            if(male) {
+                System.out.println(angle);
+                calories += angle * (double)weight * (step*stepLength)/(float)1000;
+            } else { // female
+                // shiet
+            }
+        }
+        return (int)calories;
     }
 }

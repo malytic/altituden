@@ -183,10 +183,8 @@ public class PathData {
         System.out.println(extractEncodedPath(obj));
         sb.append("?path=enc:" + extractEncodedPath(obj));
         //TODO split url into several requests when samples > 500
-        int samples = extractPathLength(obj) / 10;
-        if(samples > 500) {
-            samples = 500;
-        }
+        int samples = 512;
+        sb.append("&samples=" + samples);
         sb.append("&key=" + context.getResources().getString(R.string.google_server_key));
         return sb.toString();
     }
