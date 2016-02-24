@@ -1,6 +1,7 @@
 package com.malytic.altituden.classes;
 
 import android.annotation.TargetApi;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
@@ -21,11 +22,11 @@ public class FileHandler {
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     public static void savePathElevation(List<ElevationPoint> elevation, Context context) {
-/*
+
         File file = new File(new File("/sdcard/com.malytic.altituden"),"testcache");
         FileOutputStream outputStream;
         try {
-            outputStream = context.openFileOutput("testcache", Context.MODE_PRIVATE);
+            outputStream = context.openFileOutput("testcache", context.MODE_PRIVATE);
             outputStream.write(elevation.toString().getBytes());
             outputStream.write("\n".getBytes());
             outputStream.close();
@@ -41,7 +42,7 @@ public class FileHandler {
         return false;
     }
 
-    /* Checks if external storage is available to at least read
+    // Checks if external storage is available to at least read
     public boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state) ||
@@ -49,6 +50,6 @@ public class FileHandler {
             return true;
         }
         return false;
-    }*/
+
     }
 }
