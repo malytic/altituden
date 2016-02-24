@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -19,7 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.fragments.FormFragment;
@@ -70,8 +68,8 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
         pathData = new PathData();
+
         if(firstRun || (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED))
@@ -98,7 +96,6 @@ public class MainActivity extends AppCompatActivity
             // if (ActivityCompat.shouldShowRequestPermissionRationale(
            //          this, Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-            //      Toast.makeText(this, "Körs jag?", Toast.LENGTH_SHORT).show();
 
             // Show an expanation to the user *asynchronously* -- don't block
             // this thread waiting for the user's response! After the user
@@ -131,19 +128,14 @@ public class MainActivity extends AppCompatActivity
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     permissionsGranted = true;
-                    // permission was granted, yay! Do the
-                    // position-related task you need to do.
+                    // permission was granted, yay!
 
                 } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    // showInformationDialog();
+                    // permission denied, boo!
                     showInformationDialog();
                 }
                 return;
             }
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
@@ -164,11 +156,8 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int id) {
                         finish();
                     }
-                })
-                .show();
+                }).show();
     }
-
-
 
     /**
      * Creates new fragments and decides which
@@ -176,15 +165,6 @@ public class MainActivity extends AppCompatActivity
      */
     public void initiateFragments(){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        //weight = preferences.getInt("weight", -1);
-        //age = preferences.getInt("age", -1);
-        //gender = preferences.getInt("gender",-1);
-        //Toast.makeText(this, "Initiate", Toast.LENGTH_SHORT).show();
-
-        //if(weight == -1 || age == -1 || gender == -1)
-        //    firstRun = true;
 
         graphFragment = new GraphFragment();
         transaction.add(R.id.frame, graphFragment);
@@ -198,7 +178,6 @@ public class MainActivity extends AppCompatActivity
             mapsFragment = new MapsFragment();
             transaction.add(R.id.frame, mapsFragment);
         }
-
         transaction.commit();
     }
 
@@ -217,8 +196,7 @@ public class MainActivity extends AppCompatActivity
                             finish();
                         }
                     })
-                    .setNegativeButton("No", null)
-                    .show();
+                    .setNegativeButton("No", null).show();
         }
     }
 
@@ -239,34 +217,26 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        //if(!permissionsGranted)
-         //   initiateFragments();
 
         int id = item.getItemId();
-
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         if (id == R.id.nav_maps) {
-            Toast.makeText(this, "Nav map", Toast.LENGTH_SHORT).show();
             transaction.hide(graphFragment);
             transaction.hide(formFragment);
-
 
             if(firstRun){
                 mapsFragment = new MapsFragment();
                 transaction.add(R.id.frame, mapsFragment);
                 firstRun = false;
-            }
-
-            else if (mapsFragment.isHidden()) {
+            }else if (mapsFragment.isHidden()) {
                 transaction.show(mapsFragment);
             }
         }
