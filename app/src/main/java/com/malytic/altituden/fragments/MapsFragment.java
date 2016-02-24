@@ -1,7 +1,10 @@
 package com.malytic.altituden.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +18,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.malytic.altituden.MainActivity;
+import com.malytic.altituden.classes.ElevationPoint;
+import com.malytic.altituden.classes.FileHandler;
 import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.events.DirectionsEvent;
 import com.malytic.altituden.events.ElevationEvent;
@@ -32,6 +37,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -195,8 +202,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Subscribe
     public void onElevationResponseEvent(ElevationEvent response) {
         try {
-            MainActivity.pathData.updateElevation(response.elevationResponse);
+            //System.out.println(response.elevationResponse.toString(4));
+            MainActivity.pathData.updateElevation(response.elevationResponse, getContext());
             EventBus.getDefault().post(new ElevationUpdateEvent(""));
+            //FileHandler.savePathElevation(MainActivity.pathData.elevation, getContext());
+
         } catch (JSONException e) {
             System.out.println("JSONException.");
         }
