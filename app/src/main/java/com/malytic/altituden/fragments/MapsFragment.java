@@ -1,7 +1,10 @@
 package com.malytic.altituden.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -204,45 +207,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
             EventBus.getDefault().post(new ElevationUpdateEvent(""));
             //FileHandler.savePathElevation(MainActivity.pathData.elevation, getContext());
 
-            System.out.println("Cals for route: " + calculateCalories(MainActivity.pathData));
         } catch (JSONException e) {
             System.out.println("JSONException.");
         }
-    }
-    public static int calculateCalories(PathData pathData) {
-        //TODO calculate calories for path
-        int interpolationDistance = 100;
-        float stepLength = ((float)pathData.length / (float)512);
-        int step = (int)(interpolationDistance / stepLength);
-
-        if(step >= 512) step = 511;
-
-        boolean cond = true;
-        ElevationPoint start, end;
-        boolean male = true;
-        int weight = 80;
-        double calories = 0;
-        for(int i = 0;cond; i++) {
-            int endStep = (i+1)*step;
-            if(endStep >= 512) {
-                endStep = 511;
-                cond = false;
-            }
-
-            start = pathData.elevation.get(i*step);
-            end =  pathData.elevation.get(endStep);
-
-            double angle = Math.atan((stepLength /(end.getElevation() - start.getElevation())));
-            if(angle < 0) angle = 1;
-            else angle = (angle * 0.04) + 1;
-
-            if(male) {
-                System.out.println(angle);
-                calories += angle * (double)weight * (step*stepLength)/(float)1000;
-            } else { // female
-                // shiet
-            }
-        }
-        return (int)calories;
     }
 }

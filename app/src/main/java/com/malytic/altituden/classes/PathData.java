@@ -1,6 +1,8 @@
 package com.malytic.altituden.classes;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -35,19 +37,23 @@ public class PathData {
     public String encodedPolyline;
     public List<ElevationPoint> elevation;
     public List<LatLng> points;
+    public int calories;
+    public Context context;
 
     /**
      * Creates a new PathData object from a Google Directions response.
      * @param obj JSONObject containing directions data between two points.
      * @throws JSONException if provided JSONObject is invalid.
      */
-    public PathData(JSONObject obj) throws JSONException {
+    public PathData(JSONObject obj, Context context) throws JSONException {
         isValid = false;
         encodedPolyline = extractEncodedPath(obj);
         elevation = null;
         points = PolyUtil.decode(encodedPolyline);
         length = extractPathLength(obj);
         isValid = true;
+        calories = 0;
+        this.context = context;
     }
 
     /**
@@ -87,6 +93,7 @@ public class PathData {
      */
     public void updateElevation(JSONObject obj) throws JSONException {
         elevation = extractElevation(obj);
+
     }
 
     /**
@@ -248,5 +255,91 @@ public class PathData {
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
+    }
+
+    /**
+     * Calculates the calories burned for a path.
+     * Calories Burned = (((K1 x G) + K2) x WKG + TF) x DRK
+     * where:  G is angle in degrees,
+     *         WKG is weight in kilograms,
+     *         TF treadmill factor (air resistance),
+     *         DRK distance run in kilometers.
+     * If the user is male the calories are multiplied by 0.08.
+     *
+     * The information about the user (weight, gender) is
+     * acquired from SharedPreferences.
+     *
+     * @param pathData the path to calculate from
+     * @return int total calories burned.
+     */
+    public int calculateCalories(PathData pathData) {
+        //TODO calculate calories for path
+        float calories = 0;
+        int interpolationDistance = 100;
+
+        float stepLength = ((float)pathData.length / (float)512);
+
+        int step = (int)(interpolationDistance / stepLength);
+        if(step >= 512) step = 511;
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int weight = sp.getInt("weight", -1);
+        int gender = sp.getInt("gender", -1);
+
+        boolean male = true;
+        if(gender < 0) {
+            male = false;
+        }
+        if(weight < 1) weight = 1;
+        System.out.println("Weight: " + weight);
+        System.out.println("Gender: " + gender);
+
+        ElevationPoint start, end;
+        boolean cond = true;
+        double  K1, K2;
+        for(int i = 0; cond; i++) {
+            int endStep = (i+1)*step;
+            if(endStep >= 511) {
+                endStep = 511;
+                cond = false;
+            }
+            // find the angle between the points.
+            double base = step*stepLength;
+            start = pathData.elevation.get(i * step);
+            end =  pathData.elevation.get(endStep);
+            double angle = Math.atan((base /(end.getElevation() - start.getElevation())));
+            base = Math.hypot(base, end.getElevation() - start.getElevation());
+
+            if(angle <= -15){
+                K1 = -.01;
+                K2 = .5;
+            } else if (angle > -15 && angle <= -10) {
+                K1 = -.02;
+                K2 = .35;
+            } else if (angle > -10 && angle <= 0) {
+                K1 = .04;
+                K2 = .95;
+            } else if (angle > 0 && angle <= 10) {
+                K1 = .05;
+                K2 = .95;
+            } else if (angle > 10 && angle <= 15) {
+                K1 = .07;
+                K2 = .75;
+            } else {
+                K1 = .7;
+                K2 = .75;
+            }
+
+            double pathCals = (((K1 * angle) + K2) * weight + 0.86) * base;
+            calories += pathCals;
+            System.out.println("\n--------------------------");
+            System.out.println("PathCals: " + pathCals);
+            System.out.println("Base: " + base);
+            System.out.println("Angle: " + angle);
+            System.out.println("K1: " + K1 + ", K2: " + K2);
+        }
+
+        if(male) calories *= 1.08;
+        return (int) calories / 1000; // per kilometer, not meter
     }
 }
