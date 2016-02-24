@@ -96,13 +96,20 @@ public class PathData {
     }
 
     /**
+     * Updates the calorie count of this path.
+     * @param context to get sharedPreferences.
+     */
+    public void updateCalorieCount(Context context) {
+        calories = calculateCalories(this, context);
+    }
+
+    /**
      * Extracts the path length from a Google Directions response JSONObject.
      * @param obj Google Directions Response JSONObject.
      * @return Path length in meters.
      * @throws JSONException if provided JSONObject is invalid.
      */
     public static int extractPathLength(JSONObject obj) throws JSONException {
-       // System.out.println(obj.toString(4));
         JSONArray routesArray;
         routesArray = obj.getJSONArray("routes");
         JSONArray legsArray = null;
@@ -123,7 +130,6 @@ public class PathData {
                 }
             }
         }
-        System.out.println("Pathlength: " + pathLength);
         return pathLength;
     }
 
@@ -186,7 +192,6 @@ public class PathData {
         String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
         StringBuilder sb = new StringBuilder();
         sb.append(baseURL);
-        System.out.println(extractEncodedPath(obj));
         sb.append("?path=enc:" + extractEncodedPath(obj));
         //TODO split url into several requests when samples > 500
         int samples = 512;
@@ -236,7 +241,6 @@ public class PathData {
                 result.add(ePoint);
             }
         }
-        System.out.println(result);
         return result;
     }
 
@@ -289,9 +293,6 @@ public class PathData {
         if(gender < 0) {
             male = false;
         }
-        if(weight < 1) weight = 1;
-        System.out.println("Weight: " + weight);
-        System.out.println("Gender: " + gender);
 
         ElevationPoint start, end;
         boolean cond = true;
@@ -331,11 +332,6 @@ public class PathData {
 
             double pathCals = (((K1 * angle) + K2) * weight + 0.86) * base;
             calories += pathCals;
-            System.out.println("\n--------------------------");
-            System.out.println("PathCals: " + pathCals);
-            System.out.println("Base: " + base);
-            System.out.println("Angle: " + angle);
-            System.out.println("K1: " + K1 + ", K2: " + K2);
         }
 
         if(male) calories *= 1.08;

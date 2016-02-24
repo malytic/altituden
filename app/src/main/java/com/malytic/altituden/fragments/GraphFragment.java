@@ -64,9 +64,7 @@ public class GraphFragment extends Fragment {
             for(ElevationPoint ePoint: MainActivity.pathData.elevation) {
                 if (ePoint.getElevation() > max) max = ePoint.getElevation();
             }
-            System.out.println("Max: " + max);
             max =  (int)(max * 1.5);
-            System.out.println("Max: " + max);
 
             graph.getViewport().setMaxY(max);
             graph.getViewport().setMinY(0);
