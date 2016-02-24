@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -14,6 +15,7 @@ import com.malytic.altituden.MainActivity;
 import com.malytic.altituden.classes.ElevationPoint;
 import com.malytic.altituden.classes.HttpRequestHandler;
 import com.malytic.altituden.R;
+import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.events.ElevationUpdateEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -62,12 +64,24 @@ public class GraphFragment extends Fragment {
             for(ElevationPoint ePoint: MainActivity.pathData.elevation) {
                 if (ePoint.getElevation() > max) max = ePoint.getElevation();
             }
-            graph.getViewport().setMaxY(max*1.1);
+            System.out.println("Max: " + max);
+            max =  (int)(max * 1.5);
+            System.out.println("Max: " + max);
+
+            graph.getViewport().setMaxY(max);
             graph.getViewport().setMinY(0);
             graph.getViewport().setYAxisBoundsManual(true);
             graph.getViewport().setXAxisBoundsManual(true);
             graph.addSeries(series);
             graph.setVisibility(View.VISIBLE);
+
+            TextView header = (TextView) getView().findViewById(R.id.graph_header);
+            TextView textCalories = (TextView) getView().findViewById(R.id.graph_calories);
+            TextView textLength = (TextView) getView().findViewById(R.id.graph_length);
+
+            header.setText("Route Information");
+            textCalories.setText("Calories: " + MainActivity.pathData.calories + " kCal.");
+            textLength.setText("Route length: " + MainActivity.pathData.length + " meters.");
         } else {
         }
     }

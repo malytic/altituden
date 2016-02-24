@@ -38,14 +38,13 @@ public class PathData {
     public List<ElevationPoint> elevation;
     public List<LatLng> points;
     public int calories;
-    public Context context;
 
     /**
      * Creates a new PathData object from a Google Directions response.
      * @param obj JSONObject containing directions data between two points.
      * @throws JSONException if provided JSONObject is invalid.
      */
-    public PathData(JSONObject obj, Context context) throws JSONException {
+    public PathData(JSONObject obj) throws JSONException {
         isValid = false;
         encodedPolyline = extractEncodedPath(obj);
         elevation = null;
@@ -53,7 +52,6 @@ public class PathData {
         length = extractPathLength(obj);
         isValid = true;
         calories = 0;
-        this.context = context;
     }
 
     /**
@@ -87,12 +85,13 @@ public class PathData {
     }
 
     /**
-     * Updates the objects elevation list.
+     * Updates the objects elevation list and updates the calories.
      * @param obj JSONObject containing elevation information.
      * @throws JSONException if provided JSONObject is invalid.
      */
-    public void updateElevation(JSONObject obj) throws JSONException {
+    public void updateElevation(JSONObject obj, Context context) throws JSONException {
         elevation = extractElevation(obj);
+        calories = calculateCalories(this, context);
 
     }
 
@@ -272,7 +271,7 @@ public class PathData {
      * @param pathData the path to calculate from
      * @return int total calories burned.
      */
-    public int calculateCalories(PathData pathData) {
+    public static int calculateCalories(PathData pathData, Context context) {
         //TODO calculate calories for path
         float calories = 0;
         int interpolationDistance = 100;
