@@ -72,10 +72,11 @@ public class MainActivity extends AppCompatActivity
 
 
         pathData = new PathData();
-        if(firstRun || ContextCompat.checkSelfPermission(this,
+        if(firstRun || (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED)
+                != PackageManager.PERMISSION_GRANTED))
             showInformationDialog();
+
         initiateFragments();
     }
 
@@ -94,8 +95,8 @@ public class MainActivity extends AppCompatActivity
 
 
             // Should we show an explanation?
-             if (ActivityCompat.shouldShowRequestPermissionRationale(
-                     this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            // if (ActivityCompat.shouldShowRequestPermissionRationale(
+           //          this, Manifest.permission.ACCESS_FINE_LOCATION)) {
 
             //      Toast.makeText(this, "Körs jag?", Toast.LENGTH_SHORT).show();
 
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity
             // this thread waiting for the user's response! After the user
             // sees the explanation, try again to request the permission.
 
-            } else {
+            //} else {
             // No explanation needed, we can request the permission.
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 5);
@@ -111,8 +112,7 @@ public class MainActivity extends AppCompatActivity
             // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
             // app-defined int constant. The callback method gets the
             // result of the request.
-            }
-        }else{
+            //}
         }
     }
 
