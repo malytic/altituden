@@ -51,9 +51,9 @@ public class MainActivity extends AppCompatActivity
         age = preferences.getInt("age", -1);
         gender = preferences.getInt("gender",-1);
 
-        if(!(weight == -1 || age == -1 || gender == -1)) {
-            firstRun = false;
-        }else{
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
             firstRun = true;
         }
 
@@ -72,7 +72,9 @@ public class MainActivity extends AppCompatActivity
 
 
         pathData = new PathData();
-        if(firstRun)
+        if(firstRun || ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
             showInformationDialog();
         initiateFragments();
     }
@@ -271,7 +273,8 @@ public class MainActivity extends AppCompatActivity
 
         else if (id == R.id.nav_graph) {
             transaction.hide(formFragment);
-            transaction.hide(mapsFragment);
+            if(mapsFragment != null)
+                transaction.hide(mapsFragment);
 
             if(graphFragment.isHidden()){
                 transaction.show(graphFragment);
