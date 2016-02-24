@@ -1,5 +1,6 @@
 package com.malytic.altituden.fragments;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -8,8 +9,12 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -18,12 +23,12 @@ import com.malytic.altituden.R;
 
 public class FormFragment extends Fragment {
 
-    private Spinner spinnerGender;
     private int gender;
     private SharedPreferences preferences;
     SharedPreferences.Editor editor;
     private EditText editWeight;
     private EditText editAge;
+    private RadioButton maleButton, femaleButton;
     private int standardWeight = 80;
     private int standardAge = 25;
     private int standardGender = 1;
@@ -46,114 +51,101 @@ public class FormFragment extends Fragment {
         editor = preferences.edit();
         editWeight = (EditText) getView().findViewById(R.id.form_weight);
         editAge = (EditText) getView().findViewById(R.id.form_age);
+        maleButton = (RadioButton) getView().findViewById(R.id.radioButtonMale);
+        femaleButton = (RadioButton) getView().findViewById(R.id.radioButtonFemale);
 
-        addListenerToSpinner();
-        addListenerToSaveButton();
-        addListenerToRestoreButton();
+        // hide cursor
+        editAge.setCursorVisible(false);
+        editWeight.setCursorVisible(false);
+
         restoreValues();
     }
 
     /**
-     * Adds listener to gender-spinner.
-     * Female is referred to as 0 and male as 1
+     * when a radiobutton is clicked, this method is called.
+     * Listener is created in xml.
      */
-    public void addListenerToSpinner() {
-        spinnerGender = (Spinner) getView().findViewById(R.id.form_gender);
-
-        spinnerGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
-                if (position == 0) {
-                    gender = 0;
-                } else {
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radioButtonMale:
+                if (checked)
                     gender = 1;
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-                // TODO Auto-generated method stub
-            }
-        });
+                break;
+            case R.id.radioButtonFemale:
+                if (checked)
+                    gender = 0;
+                break;
+        }
     }
 
     /**
-     * Adds listener to save-button
      * Clears all old settings and saves the new settings
      * Has try/catch clause to handle if its not and int
      * entered in the textbox. Shows toast
      */
-    public void addListenerToSaveButton() {
-        (getView().findViewById(R.id.form_buttonSave)).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                boolean valid = true;
+    public void saveClick(View view) {
+        boolean valid = true;
 
-                editor.remove("gender");
-                editor.putInt("gender", gender);
+        editor.remove("gender");
+        editor.putInt("gender", gender);
+        editor.apply();
+
+        try {
+            int weight = Integer.parseInt(((EditText) getView().findViewById(R.id.form_weight)).getText().toString());
+            if(weight < minWeight || weight > maxWeight){
+                Toast.makeText(getActivity(), "Weight not valid", Toast.LENGTH_SHORT).show();
+                valid = false;
+            }else{
+                editor.remove("weight");
                 editor.apply();
-
-                try {
-                    int weight = Integer.parseInt(((EditText) getView().findViewById(R.id.form_weight)).getText().toString());
-                    if(weight < minWeight || weight > maxWeight){
-                        Toast.makeText(getActivity(), "Weight not valid", Toast.LENGTH_SHORT).show();
-                        valid = false;
-                    }else{
-                        editor.remove("weight");
-                        editor.apply();
-                        editor.putInt("weight", weight);
-                        editor.apply();
-                    }
-                } catch (Exception e) {
-                    Toast.makeText(getActivity(), "Weight not valid", Toast.LENGTH_SHORT).show();
-                    valid = false;
-                }
-
-                try {
-                    int age = Integer.parseInt(((EditText) getView().findViewById(R.id.form_age)).getText().toString());
-                    if(age < minAge || age > maxAge){
-                        Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();
-                        valid = false;
-                    }else{
-                        editor.remove("age");
-                        editor.apply();
-                        editor.putInt("age", age);
-                        editor.apply();
-                        MainActivity.pathData.updateCalorieCount(getContext());
-                    }
-                } catch (Exception e) {
-                    Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();
-                    valid = false;
-                }
-
-                if(valid)
-                    Toast.makeText(getActivity(), "Your settings have been saved", Toast.LENGTH_SHORT).show();
+                editor.putInt("weight", weight);
+                editor.apply();
             }
-        });
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), "Weight not valid", Toast.LENGTH_SHORT).show();
+            valid = false;
+        }
+
+        try {
+            int age = Integer.parseInt(((EditText) getView().findViewById(R.id.form_age)).getText().toString());
+            if(age < minAge || age > maxAge){
+                Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();
+                valid = false;
+            }else{
+                editor.remove("age");
+                editor.apply();
+                editor.putInt("age", age);
+                editor.apply();
+                MainActivity.pathData.updateCalorieCount(getContext());
+            }
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();
+            valid = false;
+        }
+
+        if(valid)
+            Toast.makeText(getActivity(), "Your settings have been saved", Toast.LENGTH_SHORT).show();
     }
 
     /**
-     * Adds listener to restore-button
      * Clears all old settings
      * Shows toast
      */
-    public void addListenerToRestoreButton() {
-        (getView().findViewById(R.id.form_buttonRestore)).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                editWeight.setText(""+standardWeight);
-                editAge.setText(""+standardAge);
+    public void restoreClick(View v) {
+        editWeight.setText(""+standardWeight);
+        editAge.setText("" + standardAge);
 
-                spinnerGender.setSelection(standardGender);
+        //Enter standard values
+        editor.putInt("weight", standardWeight);
+        editor.putInt("age", standardAge);
+        editor.putInt("gender", standardGender);
 
-                //Enter standard values
-                editor.putInt("weight", standardWeight);
-                editor.putInt("age", standardAge);
-                editor.putInt("gender", standardGender);
-
-                Toast.makeText(getActivity(),
-                        "Your settings have been restored to standard. Now save if you want to keep changes.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
+        Toast.makeText(getActivity(),
+                "Your settings have been restored to standard. Now save if you want to keep changes.",
+                Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -172,14 +164,52 @@ public class FormFragment extends Fragment {
         } else{
             editAge.setText("" + preferences.getInt("age", -1));
         }
-
-        if (preferences.getInt("gender", -1) == -1) {
-            editor.putInt("gender", 1);
-            spinnerGender.setSelection(1);
-        }else {
-            spinnerGender.setSelection(preferences.getInt("gender", -1));
+        switch (preferences.getInt("gender", -1)){
+            case 1:
+                maleButton.toggle();
+                break;
+            case 0:
+                femaleButton.toggle();
+                break;
+            default:
+                maleButton.toggle();
+                break;
         }
 
         editor.apply();
+    }
+
+    public void onClick(View view) {
+        editAge.setCursorVisible(false);
+        editWeight.setCursorVisible(false);
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        switch (view.getId()) {
+            case R.id.form_weight:
+                editWeight.setCursorVisible(true);
+                break;
+            case R.id.form_age:
+                editAge.setCursorVisible(true);
+                break;
+            case R.id.radioButtonMale:
+                onRadioButtonClicked(view);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                break;
+            case R.id.radioButtonFemale:
+                onRadioButtonClicked(view);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                break;
+            case R.id.form_buttonSave:
+                saveClick(view);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                break;
+            case R.id.form_buttonRestore:
+                restoreClick(view);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                break;
+            default:
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                break;
+        }
     }
 }
