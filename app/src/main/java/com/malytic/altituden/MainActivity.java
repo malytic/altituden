@@ -1,6 +1,7 @@
 package com.malytic.altituden;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -11,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -34,6 +36,22 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        graphFragment = new GraphFragment();
+        transaction.add(R.id.frame, graphFragment);
+        transaction.hide(graphFragment);
+
+        formFragment = new FormFragment();
+        transaction.add(R.id.frame, formFragment);
+        transaction.hide(formFragment);
+
+        mapsFragment = new MapsFragment();
+        transaction.add(R.id.frame, mapsFragment);
+
+        transaction.commit();
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -81,7 +99,16 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            new AlertDialog.Builder(this)
+                    .setMessage("Are you sure you want to close Altituden?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
         }
     }
 
@@ -111,58 +138,37 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_blank) {
-            Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Graph");
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-            if(tmp != null)
-                if(tmp != graphFragment)
-                    transaction.hide(tmp);
+        if (id == R.id.nav_maps) {
+            transaction.hide(graphFragment);
+            transaction.hide(formFragment);
 
-            if(graphFragment == null) {
-                graphFragment = new GraphFragment();
-                transaction.add(R.id.frame, graphFragment);
-            }else if(graphFragment.isHidden()){
+            if (mapsFragment.isHidden()) {
+                transaction.show(mapsFragment);
+            }
+        }
+
+        else if (id == R.id.nav_graph) {
+            transaction.hide(formFragment);
+            transaction.hide(mapsFragment);
+
+            if(graphFragment.isHidden()){
                 transaction.show(graphFragment);
                 graphFragment.onResume();
             }
-            transaction.commit();
         }
 
-        if (id == R.id.nav_slideshow) {
-            Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Map");
+        else if (id == R.id.nav_form) {
+            transaction.hide(graphFragment);
+            transaction.hide(mapsFragment);
 
-            if(tmp != null)
-                if(tmp != mapsFragment)
-                    transaction.hide(tmp);
-
-            if(mapsFragment == null) {
-                mapsFragment = new MapsFragment();
-                transaction.add(R.id.frame, mapsFragment);
-            }else if(mapsFragment.isHidden()){
-                transaction.show(mapsFragment);
-            }
-            transaction.commit();
-        }
-        if (id == R.id.nav_form) {
-            Fragment tmp = getSupportFragmentManager().findFragmentById(R.id.frame);
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack("Form");
-
-            if(tmp != null)
-                if(tmp != formFragment)
-                    transaction.hide(tmp);
-
-            if(formFragment == null) {
-                formFragment = new FormFragment();
-                transaction.add(R.id.frame, formFragment);
-            }else if(formFragment.isHidden()){
+            if(formFragment.isHidden()){
                 transaction.show(formFragment);
             }
-
-            transaction.commit();
         }
 
+        transaction.commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

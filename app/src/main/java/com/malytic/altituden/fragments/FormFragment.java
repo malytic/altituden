@@ -1,7 +1,6 @@
 package com.malytic.altituden.fragments;
 
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -21,8 +20,17 @@ public class FormFragment extends Fragment {
     private Spinner spinnerGender;
     private int gender;
     private SharedPreferences preferences;
+    SharedPreferences.Editor editor;
     private EditText editWeight;
     private EditText editAge;
+    private int standardWeight = 80;
+    private int standardAge = 25;
+    private int standardGender = 1;
+
+    private int minWeight = 1;
+    private int maxWeight = 1000;
+    private int minAge = 1;
+    private int maxAge = 110;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -34,13 +42,13 @@ public class FormFragment extends Fragment {
     public void onStart() {
         super.onStart();
         preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        editor = preferences.edit();
         editWeight = (EditText) getView().findViewById(R.id.form_weight);
         editAge = (EditText) getView().findViewById(R.id.form_age);
 
-        initEditText();
         addListenerToSpinner();
         addListenerToSaveButton();
-        addListenerToClearButton();
+        addListenerToRestoreButton();
         restoreValues();
     }
 
@@ -69,34 +77,6 @@ public class FormFragment extends Fragment {
     }
 
     /**
-     * Initiates the EditText-boxes
-     * Removes the placeholder-text and sets the
-     * text to be black when touched
-     */
-    public void initEditText() {
-        editWeight.setTextColor(Color.GRAY);
-        editAge.setTextColor(Color.GRAY);
-
-        editWeight.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                editWeight.setText("");
-                editWeight.setTextColor(Color.BLACK);
-                return false;
-            }
-        });
-
-        editAge.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                editAge.setText("");
-                editAge.setTextColor(Color.BLACK);
-                return false;
-            }
-        });
-    }
-
-    /**
      * Adds listener to save-button
      * Clears all old settings and saves the new settings
      * Has try/catch clause to handle if its not and int
@@ -105,95 +85,99 @@ public class FormFragment extends Fragment {
     public void addListenerToSaveButton() {
         (getView().findViewById(R.id.form_buttonSave)).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.clear();
+                boolean valid = true;
+
+                editor.remove("gender");
+                editor.putInt("gender", gender);
                 editor.apply();
 
                 try {
                     int weight = Integer.parseInt(((EditText) getView().findViewById(R.id.form_weight)).getText().toString());
-                    editor.putInt("weight", weight);
+                    if(weight < minWeight || weight > maxWeight){
+                        Toast.makeText(getActivity(), "Weight not valid", Toast.LENGTH_SHORT).show();
+                        valid = false;
+                    }else{
+                        editor.remove("weight");
+                        editor.apply();
+                        editor.putInt("weight", weight);
+                        editor.apply();
+                    }
                 } catch (Exception e) {
-                    editor.remove("weight");
+                    Toast.makeText(getActivity(), "Weight not valid", Toast.LENGTH_SHORT).show();
+                    valid = false;
                 }
 
                 try {
                     int age = Integer.parseInt(((EditText) getView().findViewById(R.id.form_age)).getText().toString());
-                    editor.putInt("age", age);
+                    if(age < minAge || age > maxAge){
+                        Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();
+                        valid = false;
+                    }else{
+                        editor.remove("age");
+                        editor.apply();
+                        editor.putInt("age", age);
+                        editor.apply();
+                    }
                 } catch (Exception e) {
-                    editor.remove("age");
+                    Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();
+                    valid = false;
                 }
-                editor.putInt("gender", gender);
-                editor.apply();
 
-                Toast.makeText(getActivity(), "Your settings have been saved", Toast.LENGTH_SHORT).show();
+                if(valid)
+                    Toast.makeText(getActivity(), "Your settings have been saved", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     /**
-     * Adds listener to clear-button
+     * Adds listener to restore-button
      * Clears all old settings
      * Shows toast
      */
-    public void addListenerToClearButton() {
-        (getView().findViewById(R.id.form_buttonClear)).setOnClickListener(new View.OnClickListener() {
+    public void addListenerToRestoreButton() {
+        (getView().findViewById(R.id.form_buttonRestore)).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                SharedPreferences.Editor editor = preferences.edit();
+                editWeight.setText(""+standardWeight);
+                editAge.setText(""+standardAge);
 
-                editWeight.setText("ex. 230kg");
-                editWeight.setTextColor(Color.GRAY);
+                spinnerGender.setSelection(standardGender);
 
-                editAge.setText("ex. 459 years");
-                editAge.setTextColor(Color.GRAY);
+                //Enter standard values
+                editor.putInt("weight", standardWeight);
+                editor.putInt("age", standardAge);
+                editor.putInt("gender", standardGender);
 
-                spinnerGender.setSelection(0);
-
-                Toast.makeText(getActivity(), "Your settings have been cleared", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(),
+                        "Your settings have been restored to standard. Now save if you want to keep changes.",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     /**
      * If there are saved values, restore these.
+     * If not, set standard values
      */
     public void restoreValues() {
-        if (!(preferences.getInt("weight", -1) == -1)) {
+        if (preferences.getInt("weight", -1) == -1) {
+            editor.putInt("weight", standardWeight);
+        } else {
             editWeight.setText("" + preferences.getInt("weight", -1));
-            editWeight.setTextColor(Color.BLACK);
         }
-        if (!(preferences.getInt("age", -1) == -1)) {
+
+        if (preferences.getInt("age", -1) == -1) {
+            editor.putInt("age", standardAge);
+        } else{
             editAge.setText("" + preferences.getInt("age", -1));
-            editAge.setTextColor(Color.BLACK);
         }
-        if (!(preferences.getInt("gender", -1) == -1)) {
+
+        if (preferences.getInt("gender", -1) == -1) {
+            editor.putInt("gender", 1);
+            spinnerGender.setSelection(1);
+        }else {
             spinnerGender.setSelection(preferences.getInt("gender", -1));
         }
-    }
 
-    /**
-     * @return the saved age, -1 if no weight exists
-     */
-    public int getAge() {
-        return preferences.getInt("age", -1);
-    }
-
-    /**
-     * @return the saved weight, -1 if no value exists
-     */
-    public int getWeight() {
-        return preferences.getInt("weight", -1);
-    }
-
-    /**
-     * @return the saved gender, null if no value exists
-     */
-    public String getGender() {
-        if ((preferences.getInt("gender", -1) == -1)) {
-            return null;
-        } else if (preferences.getInt("gender", -1) == 0) {
-            return "female";
-        } else {
-            return "male";
-        }
+        editor.apply();
     }
 }
