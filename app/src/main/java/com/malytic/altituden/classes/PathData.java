@@ -100,6 +100,7 @@ public class PathData {
      * @param context to get sharedPreferences.
      */
     public void updateCalorieCount(Context context) {
+        if(elevation != null && elevation.size() > 0)
         calories = calculateCalories(this, context);
     }
 

@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.malytic.altituden.MainActivity;
 import com.malytic.altituden.R;
 
 public class FormFragment extends Fragment {
@@ -117,6 +118,7 @@ public class FormFragment extends Fragment {
                         editor.apply();
                         editor.putInt("age", age);
                         editor.apply();
+                        MainActivity.pathData.updateCalorieCount(getContext());
                     }
                 } catch (Exception e) {
                     Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();
