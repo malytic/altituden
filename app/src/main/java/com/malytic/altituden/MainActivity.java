@@ -2,8 +2,10 @@ package com.malytic.altituden;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -17,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.fragments.FormFragment;
@@ -31,26 +34,28 @@ public class MainActivity extends AppCompatActivity
     private MapsFragment mapsFragment;
     private GraphFragment graphFragment;
     private FormFragment formFragment;
+    private boolean firstRun;
+    private boolean permissionsGranted = false;
     public static PathData pathData;
+    int weight;
+    int age;
+    int gender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        graphFragment = new GraphFragment();
-        transaction.add(R.id.frame, graphFragment);
-        transaction.hide(graphFragment);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        weight = preferences.getInt("weight", -1);
+        age = preferences.getInt("age", -1);
+        gender = preferences.getInt("gender",-1);
 
-        formFragment = new FormFragment();
-        transaction.add(R.id.frame, formFragment);
-        transaction.hide(formFragment);
-
-        mapsFragment = new MapsFragment();
-        transaction.add(R.id.frame, mapsFragment);
-
-        transaction.commit();
+        if(!(weight == -1 || age == -1 || gender == -1)) {
+            firstRun = false;
+        }else{
+            firstRun = true;
+        }
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -65,33 +70,136 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+
+        pathData = new PathData();
+        if(firstRun)
+            showInformationDialog();
+        initiateFragments();
+    }
+
+    /**
+     * Checks if the app has the correct permissions
+     * Otherwise ask for them
+     */
+    public void askPermission(){
         /*---------------------------------
         Ask permission to use GPS
         */
+
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this, Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
+            // Should we show an explanation?
+             if (ActivityCompat.shouldShowRequestPermissionRationale(
+                     this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            //      Toast.makeText(this, "Körs jag?", Toast.LENGTH_SHORT).show();
+
+            // Show an expanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
 
             } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 5);
+            // No explanation needed, we can request the permission.
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 5);
 
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
             }
+        }else{
         }
-        pathData = new PathData();
     }
+
+    /**
+     * Callback from permission ask
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 5: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    permissionsGranted = true;
+                    // permission was granted, yay! Do the
+                    // position-related task you need to do.
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    // showInformationDialog();
+                    showInformationDialog();
+                }
+                return;
+            }
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+    /**
+     * Shows a dialog about the permissions
+     */
+    public void showInformationDialog(){
+        new AlertDialog.Builder(this)
+                .setMessage(("You denied Altituden permission. Grant permission or quit app?" +
+                        "(If you have selected deny always you will have to change this in you phones settings)"))
+                .setCancelable(false)
+                .setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        askPermission();
+                    }
+                })
+                .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish();
+                    }
+                })
+                .show();
+    }
+
+
+
+    /**
+     * Creates new fragments and decides which
+     * fragment to show as startscreen
+     */
+    public void initiateFragments(){
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //weight = preferences.getInt("weight", -1);
+        //age = preferences.getInt("age", -1);
+        //gender = preferences.getInt("gender",-1);
+        //Toast.makeText(this, "Initiate", Toast.LENGTH_SHORT).show();
+
+        //if(weight == -1 || age == -1 || gender == -1)
+        //    firstRun = true;
+
+        graphFragment = new GraphFragment();
+        transaction.add(R.id.frame, graphFragment);
+        transaction.hide(graphFragment);
+
+        formFragment = new FormFragment();
+        transaction.add(R.id.frame, formFragment);
+
+        if(!firstRun){
+            transaction.hide(formFragment);
+            mapsFragment = new MapsFragment();
+            transaction.add(R.id.frame, mapsFragment);
+        }
+
+        transaction.commit();
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -136,15 +244,27 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+        //if(!permissionsGranted)
+         //   initiateFragments();
+
         int id = item.getItemId();
+
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         if (id == R.id.nav_maps) {
+            Toast.makeText(this, "Nav map", Toast.LENGTH_SHORT).show();
             transaction.hide(graphFragment);
             transaction.hide(formFragment);
 
-            if (mapsFragment.isHidden()) {
+
+            if(firstRun){
+                mapsFragment = new MapsFragment();
+                transaction.add(R.id.frame, mapsFragment);
+                firstRun = false;
+            }
+
+            else if (mapsFragment.isHidden()) {
                 transaction.show(mapsFragment);
             }
         }
