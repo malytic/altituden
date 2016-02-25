@@ -140,14 +140,19 @@ public class MainActivity extends AppCompatActivity
     public void onResume(){
         super.onResume();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        graphFragment = new GraphFragment();
-        formFragment = new FormFragment();
 
-        transaction.replace(R.id.frame, graphFragment);
-        transaction.hide(graphFragment);
-        transaction.add(R.id.frame, formFragment);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+            graphFragment = new GraphFragment();
+            formFragment = new FormFragment();
 
-        transaction.commit();
+            transaction.replace(R.id.frame, graphFragment);
+            transaction.hide(graphFragment);
+            transaction.add(R.id.frame, formFragment);
+
+            transaction.commit();
+        }
     }
 
     /**
