@@ -44,9 +44,9 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Get variables, -1 if they do not exist
-        weight = preferences.getInt("weight", -1);
-        age = preferences.getInt("age", -1);
-        gender = preferences.getInt("gender",-1);
+        //weight = preferences.getInt("weight", -1);
+        //age = preferences.getInt("age", -1);
+        //gender = preferences.getInt("gender",-1);
 
         //Set firstRun true if permissions is not already granted
         if (ContextCompat.checkSelfPermission(this,
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity
 
         //Show dialog about permissions if first time app runs
         if(firstRun)
-            showInformationDialog();
+            askPermission();
 
         initiateFragments();
     }
@@ -118,8 +118,8 @@ public class MainActivity extends AppCompatActivity
      */
     public void showInformationDialog(){
         new AlertDialog.Builder(this)
-                .setMessage(("You denied Altituden permission. Grant permission or quit app?" +
-                        "(If you have selected deny always you will have to change this in you phones settings)"))
+                .setMessage(("You denied Altituden permission. You have to grant permission in order for Altituden to run.\n\n\n" +
+                        "If you have selected deny always you will have to change this in you phones settings"))
                 .setCancelable(false)
                 .setPositiveButton("Grant", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -131,6 +131,23 @@ public class MainActivity extends AppCompatActivity
                         finish();
                     }
                 }).show();
+    }
+
+    /**
+     * Makes only formfragment display after location whitch of
+     */
+    @Override
+    public void onResume(){
+        super.onResume();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        graphFragment = new GraphFragment();
+        formFragment = new FormFragment();
+
+        transaction.replace(R.id.frame, graphFragment);
+        transaction.hide(graphFragment);
+        transaction.add(R.id.frame, formFragment);
+
+        transaction.commit();
     }
 
     /**
@@ -201,7 +218,6 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
 
         int id = item.getItemId();
-
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         if (id == R.id.nav_maps) {
