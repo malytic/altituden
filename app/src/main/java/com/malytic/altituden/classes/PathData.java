@@ -330,7 +330,7 @@ public class PathData {
                 K1 = .07;
                 K2 = .75;
             } else {
-                K1 = .7;
+                K1 = .007;
                 K2 = .75;
             }
 
