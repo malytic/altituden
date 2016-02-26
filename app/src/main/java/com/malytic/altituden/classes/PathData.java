@@ -100,7 +100,6 @@ public class PathData {
 
     /**
      * Updates the calorie count of this path.
-     * @param context to get sharedPreferences.
      */
     public void updateCalorieCount() {
         if(elevation != null && elevation.size() > 0 && context != null)
@@ -280,31 +279,40 @@ public class PathData {
      * @return int total calories burned.
      */
     public static int calculateCalories(PathData pathData, Context context) {
-        //TODO calculate calories for path
+        System.out.println("Entered calculateCalories.");
         float calories = 0;
         int interpolationDistance = 100;
-
         float stepLength = ((float)pathData.length / (float)512);
+        System.out.println("Entered calculateCalories.");
 
         int step = (int)(interpolationDistance / stepLength);
+        if(step < 1) step = 1;
+        System.out.println("Step = " + step);
         if(step >= 512) step = 511;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        System.out.println("Entered calculateCalories.");
 
         int weight = sp.getInt("weight", -1);
         int gender = sp.getInt("gender", -1);
+        System.out.println("Entered calculateCalories.");
 
         boolean male = true;
         if(gender < 0) {
             male = false;
         }
-
+        System.out.println("Entered calculateCalories.");
         ElevationPoint start, end;
         boolean cond = true;
         double  K1, K2;
         for(int i = 0; cond; i++) {
+            if(i > 512) {
+
+            }
             int endStep = (i+1)*step;
+            System.out.println("endStep= " + endStep + ", step=" + step);
             if(endStep >= 511) {
                 endStep = 511;
+                System.out.println("Cals counted. Exiting for-loop.");
                 cond = false;
             }
             // find the angle between the points.

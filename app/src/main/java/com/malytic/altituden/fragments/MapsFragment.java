@@ -198,7 +198,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                     .addAll(MainActivity.pathData.points);
             if (path != null) path.remove();
             path = mMap.addPolyline(thePath);
-        } catch (JSONException e) {
+        } catch (JSONException | NullPointerException e) {
+            if(e instanceof NullPointerException) {
+                path.remove();
+                System.out.println("Invalid path.");
+            }
             e.printStackTrace();
         }
         updateElevation(event.directionsResponse);
