@@ -34,20 +34,10 @@ public class MainActivity extends AppCompatActivity
     private boolean firstRun;
 
     public static PathData pathData;
-    int weight;
-    int age;
-    int gender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        //Get variables, -1 if they do not exist
-        //weight = preferences.getInt("weight", -1);
-        //age = preferences.getInt("age", -1);
-        //gender = preferences.getInt("gender",-1);
 
         //Set firstRun true if permissions is not already granted
         if (ContextCompat.checkSelfPermission(this,
