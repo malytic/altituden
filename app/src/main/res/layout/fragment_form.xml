@@ -39,16 +39,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
-            android:orientation="horizontal">>
+            android:orientation="horizontal">
 
             <RadioButton
-                android:layout_width="79dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Male"
                 android:id="@+id/radioButtonMale"
                 android:layout_gravity="bottom|right"
                 android:onClick="fragmentClick"
-                android:checked="true" />
+                android:checked="false" />
 
             <RadioButton
                 android:layout_width="wrap_content"

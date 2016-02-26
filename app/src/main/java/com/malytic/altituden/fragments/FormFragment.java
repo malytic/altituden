@@ -119,7 +119,7 @@ public class FormFragment extends Fragment {
                 editor.apply();
                 editor.putInt("age", age);
                 editor.apply();
-                MainActivity.pathData.updateCalorieCount(getContext());
+                MainActivity.pathData.updateCalorieCount();
             }
         } catch (Exception e) {
             Toast.makeText(getActivity(), "Age not valid", Toast.LENGTH_SHORT).show();

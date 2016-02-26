@@ -25,8 +25,6 @@ import com.malytic.altituden.fragments.FormFragment;
 import com.malytic.altituden.fragments.GraphFragment;
 import com.malytic.altituden.fragments.MapsFragment;
 
-import org.json.JSONObject;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -34,22 +32,14 @@ public class MainActivity extends AppCompatActivity
     private GraphFragment graphFragment;
     private FormFragment formFragment;
     private boolean firstRun;
-    private boolean permissionsGranted = false;
+
     public static PathData pathData;
-    int weight;
-    int age;
-    int gender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        weight = preferences.getInt("weight", -1);
-        age = preferences.getInt("age", -1);
-        gender = preferences.getInt("gender",-1);
-
+        //Set firstRun true if permissions is not already granted
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -71,10 +61,9 @@ public class MainActivity extends AppCompatActivity
 
         pathData = new PathData();
 
-        if(firstRun || (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED))
-            showInformationDialog();
+        //Show dialog about permissions if first time app runs
+        if(firstRun)
+            askPermission();
 
         initiateFragments();
     }
@@ -82,43 +71,21 @@ public class MainActivity extends AppCompatActivity
     /**
      * Checks if the app has the correct permissions
      * Otherwise ask for them
+     * Code from:
+     *      http://developer.android.com/training/permissions/requesting.html
      */
     public void askPermission(){
-        /*---------------------------------
-        Ask permission to use GPS
-        */
-
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
-
-            // Should we show an explanation?
-            // if (ActivityCompat.shouldShowRequestPermissionRationale(
-           //          this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-
-            // Show an expanation to the user *asynchronously* -- don't block
-            // this thread waiting for the user's response! After the user
-            // sees the explanation, try again to request the permission.
-
-            //} else {
-            // No explanation needed, we can request the permission.
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 5);
-
-            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-            //}
         }
     }
 
     /**
      * Callback from permission ask
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -127,15 +94,12 @@ public class MainActivity extends AppCompatActivity
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    permissionsGranted = true;
                     // permission was granted, yay!
-
                 } else {
                     // permission denied, boo!
+                    //Show same informationdialog as if firstRun
                     showInformationDialog();
                 }
-                return;
             }
         }
     }
@@ -145,8 +109,8 @@ public class MainActivity extends AppCompatActivity
      */
     public void showInformationDialog(){
         new AlertDialog.Builder(this)
-                .setMessage(("You denied Altituden permission. Grant permission or quit app?" +
-                        "(If you have selected deny always you will have to change this in you phones settings)"))
+                .setMessage(("You denied Altituden permission. You have to grant permission in order for Altituden to run.\n\n\n" +
+                        "If you have selected deny always you will have to change this in you phones settings"))
                 .setCancelable(false)
                 .setPositiveButton("Grant", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -158,6 +122,28 @@ public class MainActivity extends AppCompatActivity
                         finish();
                     }
                 }).show();
+    }
+
+    /**
+     * Makes only formfragment display after location whitch of
+     */
+    @Override
+    public void onResume(){
+        super.onResume();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+            graphFragment = new GraphFragment();
+            formFragment = new FormFragment();
+
+            transaction.replace(R.id.frame, graphFragment);
+            transaction.hide(graphFragment);
+            transaction.add(R.id.frame, formFragment);
+
+            transaction.commit();
+        }
     }
 
     /**
@@ -174,6 +160,8 @@ public class MainActivity extends AppCompatActivity
         formFragment = new FormFragment();
         transaction.add(R.id.frame, formFragment);
 
+        //If not first time app runs a map should be the first screen
+        //Create map, set it as current fragment and hide formFragment
         if(!firstRun){
             transaction.hide(formFragment);
             mapsFragment = new MapsFragment();
@@ -226,12 +214,16 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
 
         int id = item.getItemId();
-
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         if (id == R.id.nav_maps) {
+            //Hide all other fragments
             transaction.hide(graphFragment);
             transaction.hide(formFragment);
+            //A fragment with the tag "crash" is present if the map has
+            //crashed some time. Hide it if it exists
+            if(getSupportFragmentManager().findFragmentByTag("crash") != null)
+                transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
 
             if(firstRun){
                 mapsFragment = new MapsFragment();
@@ -243,7 +235,13 @@ public class MainActivity extends AppCompatActivity
         }
 
         else if (id == R.id.nav_graph) {
+            //Hide all other fragments
             transaction.hide(formFragment);
+            //A fragment with the tag "crash" is present if the map has
+            //crashed some time. Hide it if it exists
+            if(getSupportFragmentManager().findFragmentByTag("crash") != null)
+                transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
+
             if(mapsFragment != null)
                 transaction.hide(mapsFragment);
 
@@ -254,8 +252,15 @@ public class MainActivity extends AppCompatActivity
         }
 
         else if (id == R.id.nav_form) {
+            //Hide all other fragments
             transaction.hide(graphFragment);
-            transaction.hide(mapsFragment);
+            //A fragment with the tag "crash" is present if the map has
+            //crashed some time. Hide it if it exists
+            if(getSupportFragmentManager().findFragmentByTag("crash") != null)
+                transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
+
+            if(mapsFragment != null)
+                transaction.hide(mapsFragment);
 
             if(formFragment.isHidden()){
                 transaction.show(formFragment);
