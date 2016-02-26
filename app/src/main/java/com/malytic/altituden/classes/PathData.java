@@ -27,7 +27,8 @@ import java.util.Map;
  * contained in a Google Directions response. It also
  * has some static functions for extracting information from
  * JSONObjects as well as some functions for building
- * http-request urls to use with Google APIs.
+ * http-request urls to use with Google APIs. Also handles
+ * calculation of calories.
  *
  */
 public class PathData {
@@ -38,6 +39,7 @@ public class PathData {
     public List<ElevationPoint> elevation;
     public List<LatLng> points;
     public int calories;
+    private Context context;
 
     /**
      * Creates a new PathData object from a Google Directions response.
@@ -92,6 +94,7 @@ public class PathData {
     public void updateElevation(JSONObject obj, Context context) throws JSONException {
         elevation = extractElevation(obj);
         calories = calculateCalories(this, context);
+        this.context = context;
 
     }
 
@@ -99,9 +102,9 @@ public class PathData {
      * Updates the calorie count of this path.
      * @param context to get sharedPreferences.
      */
-    public void updateCalorieCount(Context context) {
-        if(elevation != null && elevation.size() > 0)
-        calories = calculateCalories(this, context);
+    public void updateCalorieCount() {
+        if(elevation != null && elevation.size() > 0 && context != null)
+            calories = calculateCalories(this, context);
     }
 
     /**
