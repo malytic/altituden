@@ -137,6 +137,8 @@ public class FormFragment extends Fragment {
     public void restoreClick(View v) {
         editWeight.setText(""+standardWeight);
         editAge.setText("" + standardAge);
+        if(!maleButton.isChecked())
+            maleButton.toggle();
 
         //Enter standard values
         editor.putInt("weight", standardWeight);
@@ -172,7 +174,7 @@ public class FormFragment extends Fragment {
                 femaleButton.toggle();
                 break;
             default:
-                maleButton.toggle();
+                editor.putInt("gender",1);
                 break;
         }
 
