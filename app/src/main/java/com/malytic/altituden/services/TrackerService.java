@@ -104,9 +104,9 @@ public class TrackerService extends Service implements LocationListener {
         mIsTracking = true;
         mEditor.putBoolean(TRACKING_STATUS, mIsTracking);
         mEditor.commit();
+        // create new row in database here
         if (mGoogleApiClient.isConnected()) {
             requestLocationUpdates();
-            // create new row in database
         } else {
             mGoogleApiClient.connect();
         }
