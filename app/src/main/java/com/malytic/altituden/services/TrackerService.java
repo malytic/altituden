@@ -57,7 +57,7 @@ public class TrackerService extends Service implements LocationListener {
         mEditor = mPreferences.edit();
         mIsTracking = mPreferences.getBoolean(TRACKING_STATUS, false);
         long mTrackingTime = mPreferences.getLong(TRACKING_TIME, 0);
-        boolean mTrackingExpired = System.currentTimeMillis() < (mTrackingTime+TRACKING_TIME_DIFF);
+        boolean mTrackingExpired = System.currentTimeMillis() > mTrackingTime + TRACKING_TIME_DIFF;
         Log.d(TAG, "Previous tracking status: "+ mIsTracking);
         Log.d(TAG, "Previous tracking time: "+ mTrackingTime);
         Log.d(TAG, "Has tracking expired: "+ mTrackingExpired);
