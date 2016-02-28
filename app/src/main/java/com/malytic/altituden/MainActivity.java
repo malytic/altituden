@@ -186,13 +186,13 @@ public class MainActivity extends AppCompatActivity
                     .setNegativeButton("No", null).show();
         }
     }
-
+/*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-
+*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
