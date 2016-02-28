@@ -2,10 +2,8 @@ package com.malytic.altituden;
 
 import android.Manifest;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
@@ -21,16 +19,16 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.malytic.altituden.classes.PathData;
-import com.malytic.altituden.fragments.FormFragment;
+import com.malytic.altituden.fragments.ProfileFragment;
 import com.malytic.altituden.fragments.GraphFragment;
-import com.malytic.altituden.fragments.MapsFragment;
+import com.malytic.altituden.fragments.RouteFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private MapsFragment mapsFragment;
+    private RouteFragment mapsFragment;
     private GraphFragment graphFragment;
-    private FormFragment formFragment;
+    private ProfileFragment formFragment;
     private boolean firstRun;
 
     public static PathData pathData;
@@ -136,7 +134,7 @@ public class MainActivity extends AppCompatActivity
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED){
             graphFragment = new GraphFragment();
-            formFragment = new FormFragment();
+            formFragment = new ProfileFragment();
 
             transaction.replace(R.id.frame, graphFragment);
             transaction.hide(graphFragment);
@@ -157,14 +155,14 @@ public class MainActivity extends AppCompatActivity
         transaction.add(R.id.frame, graphFragment);
         transaction.hide(graphFragment);
 
-        formFragment = new FormFragment();
+        formFragment = new ProfileFragment();
         transaction.add(R.id.frame, formFragment);
 
         //If not first time app runs a map should be the first screen
         //Create map, set it as current fragment and hide formFragment
         if(!firstRun){
             transaction.hide(formFragment);
-            mapsFragment = new MapsFragment();
+            mapsFragment = new RouteFragment();
             transaction.add(R.id.frame, mapsFragment);
         }
         transaction.commit();
@@ -216,7 +214,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        if (id == R.id.nav_maps) {
+        if (id == R.id.nav_route) {
             //Hide all other fragments
             transaction.hide(graphFragment);
             transaction.hide(formFragment);
@@ -226,7 +224,7 @@ public class MainActivity extends AppCompatActivity
                 transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
 
             if(firstRun){
-                mapsFragment = new MapsFragment();
+                mapsFragment = new RouteFragment();
                 transaction.add(R.id.frame, mapsFragment);
                 firstRun = false;
             }else if (mapsFragment.isHidden()) {
@@ -251,7 +249,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        else if (id == R.id.nav_form) {
+        else if (id == R.id.nav_profile) {
             //Hide all other fragments
             transaction.hide(graphFragment);
             //A fragment with the tag "crash" is present if the map has

@@ -1,10 +1,7 @@
 package com.malytic.altituden.fragments;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,8 +15,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.malytic.altituden.MainActivity;
-import com.malytic.altituden.classes.ElevationPoint;
-import com.malytic.altituden.classes.FileHandler;
 import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.events.DirectionsEvent;
 import com.malytic.altituden.events.ElevationEvent;
@@ -38,9 +33,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-
-public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
+public class RouteFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private GoogleMap mMap;
@@ -53,8 +46,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.activity_maps_fragment, null, false);
-        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
+        View view = inflater.inflate(R.layout.fragment_route, null, false);
+        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.route_fragment);
         mapFragment.getMapAsync(this);
 
 
@@ -169,7 +162,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
             mMap.setMyLocationEnabled(true);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 15));
         }catch(Exception e){
-            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frame, new FormFragment(),"crash").commit();
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frame, new ProfileFragment(),"crash").commit();
         }
     }
 
