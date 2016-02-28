@@ -14,12 +14,7 @@ import com.malytic.altituden.events.DirectionsEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
-/**
- * Created by William on 2016-02-12.
- */
 public class HttpRequestHandler {
-
-
 
     private RequestQueue queue;
     private Response.Listener<JSONObject> directionsResponseListener;

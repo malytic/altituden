@@ -1,23 +1,14 @@
 package com.malytic.altituden.classes;
 
 import android.annotation.TargetApi;
-import android.content.ContentProvider;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 
-import org.json.JSONObject;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
-/**
- * Created by William on 2016-02-19.
- */
 public class FileHandler {
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
