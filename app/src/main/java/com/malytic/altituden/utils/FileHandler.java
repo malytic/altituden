@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 
 import com.malytic.altituden.models.pojo.ElevationPoint;
 
@@ -12,6 +13,8 @@ import java.io.FileOutputStream;
 import java.util.List;
 
 public class FileHandler {
+
+    private static final String TAG = FileHandler.class.getSimpleName();
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     public static void savePathElevation(List<ElevationPoint> elevation, Context context) {
@@ -24,7 +27,7 @@ public class FileHandler {
             outputStream.write("\n".getBytes());
             outputStream.close();
         } catch (Exception e) {
-            System.out.println("Outputstream fail.");
+            Log.e(TAG, "Output stream fail");
         }
     }
     public boolean isExternalStorageWritable() {

@@ -3,6 +3,7 @@ package com.malytic.altituden.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
@@ -25,6 +26,8 @@ import java.util.List;
  * calculation of calories.
  */
 public class PathData {
+
+    private static final String TAG = PathData.class.getSimpleName();
 
     private boolean isValid;
     public int length;
@@ -272,28 +275,28 @@ public class PathData {
      * @return int total calories burned.
      */
     public static int calculateCalories(PathData pathData, Context context) {
-        System.out.println("Entered calculateCalories.");
+        Log.d(TAG, "Entered calculateCalories");
         float calories = 0;
         int interpolationDistance = 100;
         float stepLength = ((float)pathData.length / (float)512);
-        System.out.println("Entered calculateCalories.");
+        Log.d(TAG, "Entered calculateCalories");
 
         int step = (int)(interpolationDistance / stepLength);
         if(step < 1) step = 1;
-        System.out.println("Step = " + step);
+        Log.d(TAG, "Step = " + step);
         if(step >= 512) step = 511;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        System.out.println("Entered calculateCalories.");
+        Log.d(TAG, "Entered calculateCalories");
 
         int weight = sp.getInt("weight", -1);
         int gender = sp.getInt("gender", -1);
-        System.out.println("Entered calculateCalories.");
+        Log.d(TAG, "Entered calculateCalories");
 
         boolean male = true;
         if(gender < 0) {
             male = false;
         }
-        System.out.println("Entered calculateCalories.");
+        Log.d(TAG, "Entered calculateCalories");
         ElevationPoint start, end;
         boolean cond = true;
         double  K1, K2;
@@ -302,10 +305,10 @@ public class PathData {
 
             }
             int endStep = (i+1)*step;
-            System.out.println("endStep= " + endStep + ", step=" + step);
+            Log.d(TAG, "endStep= " + endStep + ", step=" + step);
             if(endStep >= 511) {
                 endStep = 511;
-                System.out.println("Cals counted. Exiting for-loop.");
+                Log.d(TAG, "Calories counted, exiting for-loop");
                 cond = false;
             }
             // find the angle between the points.

@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,8 @@ import org.json.JSONObject;
 
 public class RouteFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+
+    private static final String TAG = RouteFragment.class.getSimpleName();
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -194,7 +197,7 @@ public class RouteFragment extends Fragment implements OnMapReadyCallback, Googl
         } catch (JSONException | NullPointerException e) {
             if(e instanceof NullPointerException) {
                 path.remove();
-                System.out.println("Invalid path.");
+                Log.e(TAG, "onDirectionsResponseEvent: Invalid path");
             }
             e.printStackTrace();
         }
@@ -207,7 +210,7 @@ public class RouteFragment extends Fragment implements OnMapReadyCallback, Googl
             EventBus.getDefault().post(new ElevationUpdateEvent(""));
 
         } catch (JSONException e) {
-            System.out.println("JSONException.");
+            Log.e(TAG, "onElevationResponseEvent: JSONException");
         }
     }
 }
