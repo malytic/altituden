@@ -1,9 +1,11 @@
-package com.malytic.altituden.classes;
+package com.malytic.altituden.utils;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
+
+import com.malytic.altituden.models.pojo.ElevationPoint;
 
 import java.io.File;
 import java.io.FileOutputStream;

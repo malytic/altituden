@@ -14,11 +14,10 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.malytic.altituden.classes.PathData;
+import com.malytic.altituden.network.PathData;
 import com.malytic.altituden.fragments.ProfileFragment;
 import com.malytic.altituden.fragments.GraphFragment;
 import com.malytic.altituden.fragments.RouteFragment;

@@ -1,8 +1,9 @@
-package com.malytic.altituden.classes;
+package com.malytic.altituden.models.pojo;
 
 import com.google.android.gms.maps.model.LatLng;
 
 public class ElevationPoint {
+
     private Double elevation;
     private LatLng point;
 
@@ -10,6 +11,7 @@ public class ElevationPoint {
         this.elevation = elevation;
         this.point = point;
     }
+
     public Double getElevation() {
         return elevation;
     }

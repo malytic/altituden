@@ -12,8 +12,8 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.malytic.altituden.MainActivity;
-import com.malytic.altituden.classes.ElevationPoint;
-import com.malytic.altituden.classes.HttpRequestHandler;
+import com.malytic.altituden.models.pojo.ElevationPoint;
+import com.malytic.altituden.network.HttpRequestHandler;
 import com.malytic.altituden.R;
 import com.malytic.altituden.events.ElevationUpdateEvent;
 

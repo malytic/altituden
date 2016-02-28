@@ -1,4 +1,4 @@
-package com.malytic.altituden.classes;
+package com.malytic.altituden.network;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
 import com.malytic.altituden.R;
+import com.malytic.altituden.models.pojo.ElevationPoint;
 
 import org.json.JSONArray;
 import org.json.JSONException;
