@@ -15,7 +15,6 @@ import com.malytic.altituden.MainActivity;
 import com.malytic.altituden.classes.ElevationPoint;
 import com.malytic.altituden.classes.HttpRequestHandler;
 import com.malytic.altituden.R;
-import com.malytic.altituden.classes.PathData;
 import com.malytic.altituden.events.ElevationUpdateEvent;
 
 import org.greenrobot.eventbus.EventBus;

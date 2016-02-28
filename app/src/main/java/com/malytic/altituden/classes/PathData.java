@@ -3,11 +3,9 @@ package com.malytic.altituden.classes;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
-import com.jjoe64.graphview.series.DataPoint;
 import com.malytic.altituden.R;
 
 import org.json.JSONArray;
@@ -15,21 +13,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Created by William on 2016-02-16.
- *
  * This class stores and handles all the necessary information
  * contained in a Google Directions response. It also
  * has some static functions for extracting information from
  * JSONObjects as well as some functions for building
  * http-request urls to use with Google APIs. Also handles
  * calculation of calories.
- *
  */
 public class PathData {
 
