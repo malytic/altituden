@@ -2,13 +2,19 @@ package com.malytic.altituden.services;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -18,6 +24,8 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.malytic.altituden.MainActivity;
+import com.malytic.altituden.R;
 import com.malytic.altituden.events.LocationEvent;
 import com.malytic.altituden.events.TrackerEvent;
 
@@ -57,10 +65,11 @@ public class TrackerService extends Service implements LocationListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
         if (intent == null) {
-            Log.d(TAG, "Service restarted");
+            Log.d(TAG, "Restarted by system");
         } else {
             // create new row in database here
         }
+        showNotification();
         EventBus.getDefault().post(new TrackerEvent(TrackerEvent.STARTED));
         mGoogleApiClient.connect();
         return START_STICKY;
@@ -81,11 +90,12 @@ public class TrackerService extends Service implements LocationListener {
             mGoogleApiClient.disconnect();
         }
         EventBus.getDefault().post(new TrackerEvent(TrackerEvent.STOPPED));
+        stopForeground(true);
         super.onDestroy();
     }
 
     /**
-     * Start location tracking, restart if tracking is already running.
+     * Start location tracking, restart if already running.
      */
     public static void start(Context context) {
         context.startService(new Intent(context, TrackerService.class));
@@ -120,6 +130,25 @@ public class TrackerService extends Service implements LocationListener {
     private void cancelLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         Log.d(TAG, "Location updates cancelled");
+    }
+
+    private void showNotification() {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        Resources mResources = getApplicationContext().getResources();
+        String mAppName = mResources.getString(R.string.app_name);
+        Bitmap mAppIcon = BitmapFactory.decodeResource(mResources, R.mipmap.ic_launcher);
+
+        Notification notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .setLargeIcon(mAppIcon)
+                .setContentTitle("Tracking your location")
+                .setContentText("Touch to open "+ mAppName +".")
+                .setContentIntent(pendingIntent)
+                .setWhen(0).build();
+
+        startForeground(1, notification);
     }
 
     // Defines connection callbacks for the GoogleApiClient
