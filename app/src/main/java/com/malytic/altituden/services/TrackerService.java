@@ -18,6 +18,10 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.malytic.altituden.events.LocationEvent;
+import com.malytic.altituden.events.TrackerEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Unbound service that provides location tracking in the background.
@@ -57,6 +61,7 @@ public class TrackerService extends Service implements LocationListener {
         } else {
             // create new row in database here
         }
+        EventBus.getDefault().post(new TrackerEvent(TrackerEvent.STARTED));
         mGoogleApiClient.connect();
         return START_STICKY;
     }
@@ -64,6 +69,7 @@ public class TrackerService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "onLocationChanged: " + location);
+        EventBus.getDefault().post(new LocationEvent(location));
         // save new location in database
     }
 
@@ -74,6 +80,7 @@ public class TrackerService extends Service implements LocationListener {
             cancelLocationUpdates();
             mGoogleApiClient.disconnect();
         }
+        EventBus.getDefault().post(new TrackerEvent(TrackerEvent.STOPPED));
         super.onDestroy();
     }
 
