@@ -25,9 +25,9 @@ import com.malytic.altituden.fragments.RouteFragment;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private RouteFragment mapsFragment;
+    private RouteFragment routeFragment;
     private GraphFragment graphFragment;
-    private ProfileFragment formFragment;
+    private ProfileFragment profileFragment;
     private boolean firstRun;
 
     public static PathData pathData;
@@ -133,11 +133,11 @@ public class MainActivity extends AppCompatActivity
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED){
             graphFragment = new GraphFragment();
-            formFragment = new ProfileFragment();
+            profileFragment = new ProfileFragment();
 
             transaction.replace(R.id.frame, graphFragment);
             transaction.hide(graphFragment);
-            transaction.add(R.id.frame, formFragment);
+            transaction.add(R.id.frame, profileFragment);
 
             transaction.commit();
         }
@@ -154,15 +154,15 @@ public class MainActivity extends AppCompatActivity
         transaction.add(R.id.frame, graphFragment);
         transaction.hide(graphFragment);
 
-        formFragment = new ProfileFragment();
-        transaction.add(R.id.frame, formFragment);
+        profileFragment = new ProfileFragment();
+        transaction.add(R.id.frame, profileFragment);
 
         //If not first time app runs a map should be the first screen
-        //Create map, set it as current fragment and hide formFragment
+        //Create map, set it as current fragment and hide profileFragment
         if(!firstRun){
-            transaction.hide(formFragment);
-            mapsFragment = new RouteFragment();
-            transaction.add(R.id.frame, mapsFragment);
+            transaction.hide(profileFragment);
+            routeFragment = new RouteFragment();
+            transaction.add(R.id.frame, routeFragment);
         }
         transaction.commit();
     }
@@ -216,31 +216,31 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_route) {
             //Hide all other fragments
             transaction.hide(graphFragment);
-            transaction.hide(formFragment);
+            transaction.hide(profileFragment);
             //A fragment with the tag "crash" is present if the map has
             //crashed some time. Hide it if it exists
             if(getSupportFragmentManager().findFragmentByTag("crash") != null)
                 transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
 
             if(firstRun){
-                mapsFragment = new RouteFragment();
-                transaction.add(R.id.frame, mapsFragment);
+                routeFragment = new RouteFragment();
+                transaction.add(R.id.frame, routeFragment);
                 firstRun = false;
-            }else if (mapsFragment.isHidden()) {
-                transaction.show(mapsFragment);
+            }else if (routeFragment.isHidden()) {
+                transaction.show(routeFragment);
             }
         }
 
         else if (id == R.id.nav_graph) {
             //Hide all other fragments
-            transaction.hide(formFragment);
+            transaction.hide(profileFragment);
             //A fragment with the tag "crash" is present if the map has
             //crashed some time. Hide it if it exists
             if(getSupportFragmentManager().findFragmentByTag("crash") != null)
                 transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
 
-            if(mapsFragment != null)
-                transaction.hide(mapsFragment);
+            if(routeFragment != null)
+                transaction.hide(routeFragment);
 
             if(graphFragment.isHidden()){
                 transaction.show(graphFragment);
@@ -256,11 +256,11 @@ public class MainActivity extends AppCompatActivity
             if(getSupportFragmentManager().findFragmentByTag("crash") != null)
                 transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
 
-            if(mapsFragment != null)
-                transaction.hide(mapsFragment);
+            if(routeFragment != null)
+                transaction.hide(routeFragment);
 
-            if(formFragment.isHidden()){
-                transaction.show(formFragment);
+            if(profileFragment.isHidden()){
+                transaction.show(profileFragment);
             }
         }
 
@@ -270,6 +270,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
     public void fragmentClick(View view) {
-        formFragment.onClick(view);
+        profileFragment.onClick(view);
     }
 }
