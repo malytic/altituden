@@ -19,14 +19,14 @@ import android.view.View;
 
 import com.malytic.altituden.network.PathData;
 import com.malytic.altituden.fragments.ProfileFragment;
-import com.malytic.altituden.fragments.GraphFragment;
+import com.malytic.altituden.fragments.AltitudeFragment;
 import com.malytic.altituden.fragments.RouteFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private RouteFragment routeFragment;
-    private GraphFragment graphFragment;
+    private AltitudeFragment graphFragment;
     private ProfileFragment profileFragment;
     private boolean firstRun;
 
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED){
-            graphFragment = new GraphFragment();
+            graphFragment = new AltitudeFragment();
             profileFragment = new ProfileFragment();
 
             transaction.replace(R.id.frame, graphFragment);
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity
     public void initiateFragments(){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        graphFragment = new GraphFragment();
+        graphFragment = new AltitudeFragment();
         transaction.add(R.id.frame, graphFragment);
         transaction.hide(graphFragment);
 

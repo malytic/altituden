@@ -21,7 +21,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 
-public class GraphFragment extends Fragment {
+public class AltitudeFragment extends Fragment {
     private String baseURL = "https://maps.googleapis.com/maps/api/elevation/json";
     private HttpRequestHandler httpReq;
     private GraphView graph = null;
@@ -30,7 +30,7 @@ public class GraphFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_graph, container, false);
+        return inflater.inflate(R.layout.fragment_altitude, container, false);
     }
 
     @Override
