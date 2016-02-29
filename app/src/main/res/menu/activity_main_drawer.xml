@@ -6,15 +6,15 @@
         <item
             android:id="@+id/nav_route"
             android:icon="@drawable/route_icon"
-            android:title="Create Route" />
+            android:title="@string/menu_item_route" />
         <item
             android:id="@+id/nav_graph"
             android:icon="@drawable/graph_icon"
-            android:title="Altitude Data" />
+            android:title="@string/menu_item_altitude" />
         <item
             android:id="@+id/nav_profile"
             android:icon="@drawable/profile_icon"
-            android:title="Profile Settings"/>
+            android:title="@string/menu_item_profile"/>
 
     </group>
 

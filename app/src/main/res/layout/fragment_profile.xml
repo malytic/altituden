@@ -14,7 +14,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="72dp"
-        android:text="Profile Settings"
+        android:text="@string/profile_title"
         android:textStyle="bold"
         android:textSize="25dp"
         android:layout_marginTop="20dp" />
@@ -31,7 +31,7 @@
             android:layout_gravity="center"
             android:layout_width="130dp"
             android:layout_height="wrap_content"
-            android:text="Gender:"
+            android:text="@string/profile_form_gender"
             android:onClick="fragmentClick"
             android:textSize="20dp"/>
 
@@ -44,7 +44,7 @@
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Male"
+                android:text="@string/profile_radio_male"
                 android:id="@+id/radioButtonMale"
                 android:layout_gravity="bottom|right"
                 android:onClick="fragmentClick"
@@ -53,7 +53,7 @@
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Female"
+                android:text="@string/profile_radio_female"
                 android:id="@+id/radioButtonFemale"
                 android:onClick="fragmentClick"
                 android:checked="false" />
@@ -73,7 +73,7 @@
             android:layout_gravity="center"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:text="Enter your weight in kg:"
+            android:text="@string/profile_form_weight"
             android:textSize="20dp"/>
 
         <EditText android:id="@+id/form_weight"
@@ -100,7 +100,7 @@
             android:layout_width="250dp"
             android:layout_gravity="center"
             android:layout_height="wrap_content"
-            android:text="Enter your age:"
+            android:text="@string/profile_form_age"
             android:textSize="20dp"/>
 
         <EditText android:id="@+id/form_age"
@@ -157,7 +157,7 @@
             android:paddingTop="@dimen/activity_horizontal_margin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save"
+            android:text="@string/profile_button_save"
             android:onClick="fragmentClick"
             android:layout_gravity="center"
             android:elegantTextHeight="false" />
@@ -167,7 +167,7 @@
             android:paddingTop="@dimen/activity_horizontal_margin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Restore"
+            android:text="@string/profile_button_restore"
             android:onClick="fragmentClick" />
     </LinearLayout>
 
