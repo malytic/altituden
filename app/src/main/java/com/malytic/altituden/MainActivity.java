@@ -17,16 +17,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.malytic.altituden.fragments.*;
 import com.malytic.altituden.network.PathData;
-import com.malytic.altituden.fragments.ProfileFragment;
-import com.malytic.altituden.fragments.AltitudeFragment;
-import com.malytic.altituden.fragments.RouteFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private RouteFragment routeFragment;
-    private AltitudeFragment graphFragment;
+    private TrackerFragment trackerFragment;
+    private AltitudeFragment altitudeFragment;
     private ProfileFragment profileFragment;
     private boolean firstRun;
 
@@ -132,11 +131,11 @@ public class MainActivity extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED){
-            graphFragment = new AltitudeFragment();
+            altitudeFragment = new AltitudeFragment();
             profileFragment = new ProfileFragment();
 
-            transaction.replace(R.id.frame, graphFragment);
-            transaction.hide(graphFragment);
+            transaction.replace(R.id.frame, altitudeFragment);
+            transaction.hide(altitudeFragment);
             transaction.add(R.id.frame, profileFragment);
 
             transaction.commit();
@@ -150,9 +149,13 @@ public class MainActivity extends AppCompatActivity
     public void initiateFragments(){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        graphFragment = new AltitudeFragment();
-        transaction.add(R.id.frame, graphFragment);
-        transaction.hide(graphFragment);
+        trackerFragment = new TrackerFragment();
+        transaction.add(R.id.frame, trackerFragment);
+        transaction.hide(trackerFragment);
+
+        altitudeFragment = new AltitudeFragment();
+        transaction.add(R.id.frame, altitudeFragment);
+        transaction.hide(altitudeFragment);
 
         profileFragment = new ProfileFragment();
         transaction.add(R.id.frame, profileFragment);
@@ -208,58 +211,60 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-
         int id = item.getItemId();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
+        //A fragment with the tag "crash" is present if the
+        //map has crashed some time. Hide it if it exists
+        if (getSupportFragmentManager().findFragmentByTag("crash") != null) {
+            transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
+        }
+
         if (id == R.id.nav_route) {
             //Hide all other fragments
-            transaction.hide(graphFragment);
+            transaction.hide(trackerFragment);
+            transaction.hide(altitudeFragment);
             transaction.hide(profileFragment);
-            //A fragment with the tag "crash" is present if the map has
-            //crashed some time. Hide it if it exists
-            if(getSupportFragmentManager().findFragmentByTag("crash") != null)
-                transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
 
-            if(firstRun){
+            if (firstRun) {
                 routeFragment = new RouteFragment();
                 transaction.add(R.id.frame, routeFragment);
                 firstRun = false;
-            }else if (routeFragment.isHidden()) {
+            } else if (routeFragment.isHidden()) {
                 transaction.show(routeFragment);
             }
         }
 
-        else if (id == R.id.nav_graph) {
+        else if (id == R.id.nav_tracker) {
             //Hide all other fragments
+            transaction.hide(altitudeFragment);
             transaction.hide(profileFragment);
-            //A fragment with the tag "crash" is present if the map has
-            //crashed some time. Hide it if it exists
-            if(getSupportFragmentManager().findFragmentByTag("crash") != null)
-                transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
+            if (routeFragment != null) transaction.hide(routeFragment);
 
-            if(routeFragment != null)
-                transaction.hide(routeFragment);
+            if (trackerFragment.isHidden()) {
+                transaction.show(trackerFragment);
+            }
+        }
 
-            if(graphFragment.isHidden()){
-                transaction.show(graphFragment);
-                graphFragment.onResume();
+        else if (id == R.id.nav_altitude) {
+            //Hide all other fragments
+            transaction.hide(trackerFragment);
+            transaction.hide(profileFragment);
+            if (routeFragment != null) transaction.hide(routeFragment);
+
+            if (altitudeFragment.isHidden()) {
+                transaction.show(altitudeFragment);
+                altitudeFragment.onResume();
             }
         }
 
         else if (id == R.id.nav_profile) {
             //Hide all other fragments
-            transaction.hide(graphFragment);
-            //A fragment with the tag "crash" is present if the map has
-            //crashed some time. Hide it if it exists
-            if(getSupportFragmentManager().findFragmentByTag("crash") != null)
-                transaction.hide(getSupportFragmentManager().findFragmentByTag("crash"));
+            transaction.hide(trackerFragment);
+            transaction.hide(altitudeFragment);
+            if (routeFragment != null) transaction.hide(routeFragment);
 
-            if(routeFragment != null)
-                transaction.hide(routeFragment);
-
-            if(profileFragment.isHidden()){
+            if (profileFragment.isHidden()) {
                 transaction.show(profileFragment);
             }
         }

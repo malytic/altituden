@@ -9,6 +9,7 @@
     <string name="menu_item_altitude">Altitude Data</string>
     <string name="menu_item_profile">Profile Settings</string>
     <string name="menu_item_route">Create Route</string>
+    <string name="menu_item_tracker">Track Route</string>
 
     <string name="altitude_title">Route info</string>
     <string name="altitude_field_calories">Calories</string>
@@ -23,4 +24,12 @@
     <string name="profile_form_age">Enter your age:</string>
     <string name="profile_button_save">Save</string>
     <string name="profile_button_restore">Restore</string>
+
+    <string name="tracker_title">Create route with GPS tracking</string>
+    <string name="tracker_button_start">Start Tracking</string>
+    <string name="tracker_button_stop">Stop Tracking</string>
+    <string name="tracker_status_title">Status:</string>
+    <string name="tracker_status_active">Tracking Active</string>
+    <string name="tracker_status_inactive">Not Tracking</string>
+    <string name="tracker_status_waiting">Waiting…</string>
 </resources>

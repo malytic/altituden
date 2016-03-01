@@ -8,7 +8,11 @@
             android:icon="@drawable/route_icon"
             android:title="@string/menu_item_route" />
         <item
-            android:id="@+id/nav_graph"
+            android:id="@+id/nav_tracker"
+            android:icon="@drawable/route_icon"
+            android:title="@string/menu_item_tracker"/>
+        <item
+            android:id="@+id/nav_altitude"
             android:icon="@drawable/graph_icon"
             android:title="@string/menu_item_altitude" />
         <item
