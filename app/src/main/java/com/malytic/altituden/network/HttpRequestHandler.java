@@ -31,6 +31,7 @@ public class HttpRequestHandler {
             @Override
             public void onResponse(JSONObject response) {
                 //directions response
+                System.out.println("Directions response size: " + response.toString().getBytes().length);
                 EventBus.getDefault().post(new DirectionsEvent(response));
             }
         };
@@ -38,6 +39,7 @@ public class HttpRequestHandler {
             @Override
             public void onResponse(JSONObject response) {
                 // altitude response
+                System.out.println("Altitude response size: " + response.toString().getBytes().length);
                 EventBus.getDefault().post(new ElevationEvent(response));
             }
         };

@@ -1,9 +1,8 @@
-package com.malytic.altituden.network;
+package com.malytic.altituden.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
@@ -275,28 +274,22 @@ public class PathData {
      * @return int total calories burned.
      */
     public static int calculateCalories(PathData pathData, Context context) {
-        Log.d(TAG, "Entered calculateCalories");
         float calories = 0;
         int interpolationDistance = 100;
         float stepLength = ((float)pathData.length / (float)512);
-        Log.d(TAG, "Entered calculateCalories");
 
         int step = (int)(interpolationDistance / stepLength);
         if(step < 1) step = 1;
-        Log.d(TAG, "Step = " + step);
         if(step >= 512) step = 511;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        Log.d(TAG, "Entered calculateCalories");
 
         int weight = sp.getInt("weight", -1);
         int gender = sp.getInt("gender", -1);
-        Log.d(TAG, "Entered calculateCalories");
 
         boolean male = true;
         if(gender < 0) {
             male = false;
         }
-        Log.d(TAG, "Entered calculateCalories");
         ElevationPoint start, end;
         boolean cond = true;
         double  K1, K2;
@@ -305,10 +298,8 @@ public class PathData {
 
             }
             int endStep = (i+1)*step;
-            Log.d(TAG, "endStep= " + endStep + ", step=" + step);
             if(endStep >= 511) {
                 endStep = 511;
-                Log.d(TAG, "Calories counted, exiting for-loop");
                 cond = false;
             }
             // find the angle between the points.

@@ -16,7 +16,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.malytic.altituden.MainActivity;
-import com.malytic.altituden.network.PathData;
+import com.malytic.altituden.utils.PathData;
 import com.malytic.altituden.events.DirectionsEvent;
 import com.malytic.altituden.events.ElevationEvent;
 import com.malytic.altituden.network.HttpRequestHandler;

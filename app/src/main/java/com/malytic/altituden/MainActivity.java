@@ -18,7 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.malytic.altituden.fragments.*;
-import com.malytic.altituden.network.PathData;
+import com.malytic.altituden.utils.PathData;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
