@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +16,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.malytic.altituden.MainActivity;
-import com.malytic.altituden.classes.PathData;
+import com.malytic.altituden.utils.PathData;
 import com.malytic.altituden.events.DirectionsEvent;
 import com.malytic.altituden.events.ElevationEvent;
-import com.malytic.altituden.classes.HttpRequestHandler;
+import com.malytic.altituden.network.HttpRequestHandler;
 import com.malytic.altituden.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,8 +34,10 @@ import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
-        GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class RouteFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
+        GoogleMap.OnMarkerDragListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+
+    private static final String TAG = RouteFragment.class.getSimpleName();
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -46,8 +49,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.activity_maps_fragment, null, false);
-        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
+        View view = inflater.inflate(R.layout.fragment_route, null, false);
+        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.route_fragment);
         mapFragment.getMapAsync(this);
 
 
@@ -132,7 +135,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         } else if(marker.getTitle().equals(dest.getTitle())) {
             dest.position(marker.getPosition());
         }
-        updateDirections(origin.getPosition(), dest.getPosition());
+        if(dest != null && origin != null) updateDirections(origin.getPosition(), dest.getPosition());
     }
     @Override
     public void
@@ -155,11 +158,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     }
 
     @Override
-    public void onConnected(Bundle connectionHint) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        mMap.setMyLocationEnabled(true);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 15));
+    public void onConnected(Bundle connectionHint){
+        try {
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient);
+            mMap.setMyLocationEnabled(true);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 15));
+        }catch(Exception e){
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frame, new ProfileFragment(),"crash").commit();
+        }
     }
 
     @Override
@@ -187,7 +194,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                     .addAll(MainActivity.pathData.points);
             if (path != null) path.remove();
             path = mMap.addPolyline(thePath);
-        } catch (JSONException e) {
+        } catch (JSONException | NullPointerException e) {
+            if(e instanceof NullPointerException) {
+                path.remove();
+                Log.e(TAG, "onDirectionsResponseEvent: Invalid path");
+            }
             e.printStackTrace();
         }
         updateElevation(event.directionsResponse);
@@ -195,11 +206,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Subscribe
     public void onElevationResponseEvent(ElevationEvent response) {
         try {
-            System.out.println(response.elevationResponse.toString(4));
-            MainActivity.pathData.updateElevation(response.elevationResponse);
+            MainActivity.pathData.updateElevation(response.elevationResponse, getContext());
             EventBus.getDefault().post(new ElevationUpdateEvent(""));
+
         } catch (JSONException e) {
-            System.out.println("JSONException.");
+            Log.e(TAG, "onElevationResponseEvent: JSONException");
         }
     }
 }

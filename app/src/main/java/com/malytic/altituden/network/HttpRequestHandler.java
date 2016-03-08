@@ -1,4 +1,4 @@
-package com.malytic.altituden.classes;
+package com.malytic.altituden.network;
 
 import android.content.Context;
 
@@ -14,12 +14,7 @@ import com.malytic.altituden.events.DirectionsEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
-/**
- * Created by William on 2016-02-12.
- */
 public class HttpRequestHandler {
-
-
 
     private RequestQueue queue;
     private Response.Listener<JSONObject> directionsResponseListener;
@@ -36,6 +31,7 @@ public class HttpRequestHandler {
             @Override
             public void onResponse(JSONObject response) {
                 //directions response
+                System.out.println("Directions response size: " + response.toString().getBytes().length);
                 EventBus.getDefault().post(new DirectionsEvent(response));
             }
         };
@@ -43,6 +39,7 @@ public class HttpRequestHandler {
             @Override
             public void onResponse(JSONObject response) {
                 // altitude response
+                System.out.println("Altitude response size: " + response.toString().getBytes().length);
                 EventBus.getDefault().post(new ElevationEvent(response));
             }
         };

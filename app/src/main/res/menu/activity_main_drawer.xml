@@ -4,14 +4,21 @@
     <group android:checkableBehavior="single">
 
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/karta_icon"
-            android:title="Karta" />
-
+            android:id="@+id/nav_route"
+            android:icon="@drawable/route_icon"
+            android:title="@string/menu_item_route" />
         <item
-            android:id="@+id/nav_blank"
-            android:icon="@drawable/elevation_icon"
-            android:title="Elevation" />
+            android:id="@+id/nav_tracker"
+            android:icon="@drawable/tracking_icon"
+            android:title="@string/menu_item_tracker"/>
+        <item
+            android:id="@+id/nav_altitude"
+            android:icon="@drawable/graph_icon"
+            android:title="@string/menu_item_altitude" />
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/profile_icon"
+            android:title="@string/menu_item_profile"/>
 
     </group>
 
